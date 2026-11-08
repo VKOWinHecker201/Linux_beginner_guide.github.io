@@ -1,0 +1,2427 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="catppuccin">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>guest@linux-guide:~ — The Authentic Linux Beginner's Handbook</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: JetBrains Mono & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <style>
+    /* ==========================================================================
+       TERMINAL COLOR SCHEMES (Catppuccin Mocha, Gruvbox Dark, Amber Phosphor)
+       ========================================================================== */
+    :root,
+    [data-theme="catppuccin"] {
+      --bg-outer: #0b0b12;
+      --bg-base: #11111b;
+      --bg-mantle: #181825;
+      --bg-surface: #1e1e2e;
+      --bg-card: #24253a;
+      --bg-elevated: #313244;
+      --border-dim: #313244;
+      --border-bright: #45475a;
+      --text-main: #cdd6f4;
+      --text-sub: #a6adc8;
+      --text-muted: #6c7086;
+      --accent-green: #a6e3a1;
+      --accent-blue: #89b4fa;
+      --accent-mauve: #cba6f7;
+      --accent-peach: #fab387;
+      --accent-yellow: #f9e2af;
+      --accent-red: #f38ba8;
+      --accent-teal: #94e2d5;
+      --selection-bg: rgba(137, 180, 250, 0.22);
+    }
+
+    [data-theme="gruvbox"] {
+      --bg-outer: #141617;
+      --bg-base: #1d2021;
+      --bg-mantle: #282828;
+      --bg-surface: #32302f;
+      --bg-card: #3c3836;
+      --bg-elevated: #504945;
+      --border-dim: #504945;
+      --border-bright: #665c54;
+      --text-main: #ebdbb2;
+      --text-sub: #d5c4a1;
+      --text-muted: #928374;
+      --accent-green: #b8bb26;
+      --accent-blue: #83a598;
+      --accent-mauve: #d3869b;
+      --accent-peach: #fe8019;
+      --accent-yellow: #fabd2f;
+      --accent-red: #fb4934;
+      --accent-teal: #8ec07c;
+      --selection-bg: rgba(250, 189, 47, 0.22);
+    }
+
+    [data-theme="amber"] {
+      --bg-outer: #090703;
+      --bg-base: #110c04;
+      --bg-mantle: #181106;
+      --bg-surface: #1f1608;
+      --bg-card: #281c0a;
+      --bg-elevated: #3a2910;
+      --border-dim: #493314;
+      --border-bright: #75511f;
+      --text-main: #ffca64;
+      --text-sub: #dda644;
+      --text-muted: #916923;
+      --accent-green: #ffb000;
+      --accent-blue: #ffd269;
+      --accent-mauve: #ff9933;
+      --accent-peach: #ff7f27;
+      --accent-yellow: #ffe18d;
+      --accent-red: #ff5533;
+      --accent-teal: #ffc44d;
+      --selection-bg: rgba(255, 176, 0, 0.25);
+    }
+
+    * {
+      box-sizing: border-box;
+      scrollbar-width: thin;
+      scrollbar-color: var(--border-bright) var(--bg-base);
+    }
+
+    ::selection {
+      background: var(--selection-bg);
+      color: var(--text-main);
+    }
+
+    body {
+      background-color: var(--bg-outer);
+      color: var(--text-main);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
+      line-height: 1.65;
+    }
+
+    .font-mono-code {
+      font-family: 'JetBrains Mono', monospace;
+      font-feature-settings: "liga" 1, "calt" 1;
+    }
+
+    /* Optional subtle CRT Scanlines overlay */
+    body.crt-enabled::after {
+      content: " ";
+      display: block;
+      position: fixed;
+      top: 0; left: 0; bottom: 0; right: 0;
+      background: linear-gradient(
+        rgba(18, 16, 16, 0) 50%, 
+        rgba(0, 0, 0, 0.24) 50%
+      );
+      background-size: 100% 4px;
+      z-index: 9999;
+      pointer-events: none;
+    }
+
+    /* Blinking Terminal Block Cursor */
+    @keyframes blink-cursor {
+      0%, 49% { opacity: 1; }
+      50%, 100% { opacity: 0; }
+    }
+    .cursor-block {
+      display: inline-block;
+      width: 0.6em;
+      height: 1.15em;
+      background-color: var(--accent-green);
+      vertical-align: text-bottom;
+      animation: blink-cursor 1s infinite;
+    }
+
+    /* Terminal Window Chrome & Cards */
+    .term-window {
+      background-color: var(--bg-base);
+      border: 1px solid var(--border-dim);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.65);
+    }
+
+    .term-card {
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-dim);
+      transition: border-color 0.18s ease, transform 0.18s ease;
+    }
+    .term-card:hover {
+      border-color: var(--border-bright);
+    }
+
+    .term-subcard {
+      background-color: var(--bg-mantle);
+      border: 1px solid var(--border-dim);
+    }
+
+    /* feh / kitty +icat Image Viewer Frame */
+    .feh-frame {
+      background-color: var(--bg-mantle);
+      border: 1px solid var(--border-bright);
+      border-radius: 0.375rem;
+      overflow: hidden;
+    }
+    .feh-header {
+      background-color: var(--bg-elevated);
+      border-bottom: 1px solid var(--border-dim);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      padding: 0.4rem 0.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: var(--text-sub);
+    }
+
+    /* Shell Script Navigation Tabs */
+    .nav-tab {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      padding: 0.5rem 0.75rem;
+      border-right: 1px solid var(--border-dim);
+      border-bottom: 2px solid transparent;
+      color: var(--text-sub);
+      background-color: var(--bg-mantle);
+      transition: all 0.15s ease;
+      white-space: nowrap;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.375rem;
+    }
+    .nav-tab:hover {
+      background-color: var(--bg-surface);
+      color: var(--text-main);
+    }
+    .nav-tab.active {
+      background-color: var(--bg-base);
+      color: var(--accent-green);
+      border-bottom-color: var(--accent-green);
+      font-weight: 600;
+    }
+
+    /* Accent Helpers */
+    .text-term-green { color: var(--accent-green); }
+    .text-term-blue { color: var(--accent-blue); }
+    .text-term-mauve { color: var(--accent-mauve); }
+    .text-term-peach { color: var(--accent-peach); }
+    .text-term-yellow { color: var(--accent-yellow); }
+    .text-term-red { color: var(--accent-red); }
+    .text-term-teal { color: var(--accent-teal); }
+    .text-term-main { color: var(--text-main); }
+    .text-term-sub { color: var(--text-sub); }
+    .text-term-muted { color: var(--text-muted); }
+
+    .bg-term-surface { background-color: var(--bg-surface); }
+    .bg-term-mantle { background-color: var(--bg-mantle); }
+    .bg-term-card { background-color: var(--bg-card); }
+    .bg-term-elevated { background-color: var(--bg-elevated); }
+
+    /* Interactive Hover Cursor Prefix */
+    .cmd-link::before {
+      content: "> ";
+      color: var(--accent-green);
+      opacity: 0;
+      transition: opacity 0.15s ease;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .cmd-link:hover::before {
+      opacity: 1;
+    }
+
+    /* Page Fade-In */
+    @keyframes terminalPrint {
+      from {
+        opacity: 0;
+        transform: translateY(6px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    .animate-print {
+      animation: terminalPrint 0.24s ease-out forwards;
+    }
+
+    /* Flag pill tooltip */
+    .flag-pill {
+      background-color: var(--bg-elevated);
+      color: var(--accent-mauve);
+      border: 1px solid var(--border-bright);
+      padding: 0.1rem 0.45rem;
+      border-radius: 0.25rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+    }
+  </style>
+</head>
+<body class="crt-enabled min-h-screen flex flex-col justify-between p-0 sm:p-2 md:p-4">
+
+  <!-- ==========================================================================
+       MAIN TERMINAL APPLICATION SHELL
+       ========================================================================== -->
+  <div class="term-window w-full max-w-7xl mx-auto rounded-none sm:rounded-lg flex flex-col min-h-[calc(100vh-1rem)] sm:min-h-[calc(100vh-2rem)] overflow-hidden">
+
+    <!-- 1. TOP WINDOW CHROME BAR -->
+    <header class="bg-term-mantle border-b border-[var(--border-dim)] px-3 py-2 flex flex-wrap items-center justify-between gap-2 select-none sticky top-0 z-40">
+      <!-- Left: Window Controls & Current Working Directory -->
+      <div class="flex items-center gap-3 min-w-0">
+        <div class="flex items-center gap-1.5 shrink-0">
+          <span class="w-3 h-3 rounded-full bg-[#f38ba8] inline-block" title="Close"></span>
+          <span class="w-3 h-3 rounded-full bg-[#f9e2af] inline-block" title="Minimize"></span>
+          <span class="w-3 h-3 rounded-full bg-[#a6e3a1] inline-block" title="Maximize"></span>
+        </div>
+        <div class="font-mono-code text-xs sm:text-sm truncate">
+          <span class="text-term-green font-semibold">guest@linux-guide</span><span class="text-term-muted">:</span><span id="header-cwd" class="text-term-blue font-semibold">~/00_welcome</span><span class="text-term-main">$</span>
+        </div>
+      </div>
+
+      <!-- Right: Terminal Controls (Theme Switcher, Scanline Toggle, Fast Jump) -->
+      <div class="flex items-center gap-2 font-mono-code text-xs">
+        <label for="theme-select" class="text-term-muted hidden md:inline">palette:</label>
+        <select id="theme-select" onchange="setTheme(this.value)" class="bg-term-surface text-term-main border border-[var(--border-bright)] rounded px-2 py-1 text-xs focus:outline-none">
+          <option value="catppuccin">catppuccin-mocha</option>
+          <option value="gruvbox">gruvbox-dark</option>
+          <option value="amber">amber-crt-1988</option>
+        </select>
+
+        <button id="crt-toggle-btn" onclick="toggleCRT()" class="bg-term-surface hover:bg-term-elevated text-term-teal border border-[var(--border-bright)] rounded px-2.5 py-1 transition" title="Toggle CRT Scanlines">
+          [CRT: ON]
+        </button>
+      </div>
+    </header>
+
+    <!-- 2. EXECUTABLE SCRIPT NAVIGATION BAR (ls ./guides/) -->
+    <nav aria-label="Linux Guide Sections" class="bg-term-mantle border-b border-[var(--border-dim)] flex overflow-x-auto no-scrollbar select-none">
+      <button onclick="navigateTo('welcome')" id="tab-welcome" class="nav-tab active">
+        <span class="text-term-muted">00</span>./00_welcome.sh
+      </button>
+      <button onclick="navigateTo('distro')" id="tab-distro" class="nav-tab">
+        <span class="text-term-muted">01</span>./01_distro_choice.sh
+      </button>
+      <button onclick="navigateTo('commands')" id="tab-commands" class="nav-tab">
+        <span class="text-term-muted">02</span>./02_basic_commands.sh
+      </button>
+      <button onclick="navigateTo('de')" id="tab-de" class="nav-tab">
+        <span class="text-term-muted">03</span>./03_desktop_envs.sh
+      </button>
+      <button onclick="navigateTo('display')" id="tab-display" class="nav-tab">
+        <span class="text-term-muted">04</span>./04_wayland_vs_xorg.sh
+      </button>
+      <button onclick="navigateTo('bigthree')" id="tab-bigthree" class="nav-tab">
+        <span class="text-term-muted">05</span>./05_debian_fedora_arch.sh
+      </button>
+      <button onclick="navigateTo('advanced')" id="tab-advanced" class="nav-tab">
+        <span class="text-term-muted">06</span>./06_gentoo_and_void.sh
+      </button>
+    </nav>
+
+    <!-- 3. COMMAND EXECUTION TRANSITION BANNER -->
+    <div class="bg-term-mantle/70 border-b border-[var(--border-dim)] px-4 py-2 font-mono-code text-xs sm:text-sm flex items-center justify-between">
+      <div class="truncate">
+        <span class="text-term-green">guest@linux-guide</span>:<span class="text-term-blue">~</span>$ 
+        <span id="exec-command-text" class="text-term-main font-medium">./00_welcome.sh --fastfetch</span><span class="cursor-block ml-1"></span>
+      </div>
+      <div class="text-term-muted text-xs hidden sm:block shrink-0" id="exec-status-badge">
+        [exit: 0 | TTY: pts/0]
+      </div>
+    </div>
+
+    <!-- 4. MAIN VIEWPORT CONTENT AREA -->
+    <main id="main-viewport" class="flex-1 p-4 sm:p-6 md:p-8 overflow-y-auto space-y-8">
+
+      <!-- ======================================================================
+           PAGE 00: HOME / WELCOME (./00_welcome.sh)
+           ====================================================================== -->
+      <section id="page-welcome" class="page-section animate-print space-y-8">
+        <!-- Fastfetch / Neofetch Hero Card -->
+        <div class="term-card rounded-lg p-5 sm:p-7">
+          <div class="font-mono-code text-xs text-term-muted mb-4 border-b border-[var(--border-dim)] pb-2 flex justify-between">
+            <span>$ fastfetch --config ~/.config/fastfetch/linux-guide.jsonc</span>
+            <span class="text-term-green">v2.29.0</span>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+            <!-- Left: Authentic Tux SVG + ASCII Hybrid -->
+            <div class="lg:col-span-4 flex flex-col items-center justify-center bg-term-mantle border border-[var(--border-dim)] rounded-lg p-5">
+              <svg viewBox="0 0 220 240" class="w-40 h-44" aria-label="Tux the Linux Penguin">
+                <!-- Outer body -->
+                <path d="M110 20 C75 20 62 48 60 82 C52 108 42 135 45 170 C48 202 75 218 110 218 C145 218 172 202 175 170 C178 135 168 108 160 82 C158 48 145 20 110 20 Z" fill="#1e1e2e" stroke="#89b4fa" stroke-width="3"/>
+                <!-- White Belly -->
+                <path d="M110 82 C82 82 68 112 70 155 C72 190 88 206 110 206 C132 206 148 190 150 155 C152 112 138 82 110 82 Z" fill="#cdd6f4"/>
+                <!-- Eyes -->
+                <ellipse cx="94" cy="56" rx="10" ry="13" fill="#cdd6f4"/>
+                <ellipse cx="126" cy="56" rx="10" ry="13" fill="#cdd6f4"/>
+                <circle cx="96" cy="57" r="4.5" fill="#11111b"/>
+                <circle cx="124" cy="57" r="4.5" fill="#11111b"/>
+                <!-- Beak -->
+                <path d="M88 68 Q110 60 132 68 Q110 88 88 68 Z" fill="#fab387" stroke="#11111b" stroke-width="2"/>
+                <!-- Flippers -->
+                <path d="M58 95 C34 115 30 150 44 166 C52 156 58 135 64 115 Z" fill="#1e1e2e" stroke="#89b4fa" stroke-width="2.5"/>
+                <path d="M162 95 C186 115 190 150 176 166 C168 156 162 135 156 115 Z" fill="#1e1e2e" stroke="#89b4fa" stroke-width="2.5"/>
+                <!-- Webbed Feet -->
+                <path d="M62 206 L46 222 L76 226 L88 212 Z" fill="#fab387" stroke="#11111b" stroke-width="2"/>
+                <path d="M158 206 L174 222 L144 226 L132 212 Z" fill="#fab387" stroke="#11111b" stroke-width="2"/>
+                <!-- Terminal Prompt on Belly -->
+                <text x="86" y="148" font-family="JetBrains Mono, monospace" font-size="18" font-weight="bold" fill="#11111b">$_</text>
+              </svg>
+              <div class="font-mono-code text-xs text-term-sub mt-2 text-center">
+                <span class="text-term-green">Tux</span> • Kernel Mascot since 1996
+              </div>
+            </div>
+
+            <!-- Right: Fastfetch System Breakdown -->
+            <div class="lg:col-span-8 font-mono-code text-xs sm:text-sm space-y-2">
+              <div class="text-base sm:text-lg font-bold">
+                <span class="text-term-green">guest</span><span class="text-term-main">@</span><span class="text-term-blue">linux-beginners-handbook</span>
+              </div>
+              <div class="text-term-muted">--------------------------------------------</div>
+              <div><span class="text-term-mauve font-semibold">OS Architecture</span>: GNU/Linux (Kernel + Coreutils + Userland)</div>
+              <div><span class="text-term-mauve font-semibold">Kernel Origin</span>: Created by Linus Torvalds in 1991 (GPLv2)</div>
+              <div><span class="text-term-mauve font-semibold">Init Systems</span>: systemd, OpenRC (Gentoo), runit (Void)</div>
+              <div><span class="text-term-mauve font-semibold">Display Stack</span>: Wayland (Modern Protocol) &amp; X.Org (X11 Legacy)</div>
+              <div><span class="text-term-mauve font-semibold">Package Formats</span>: .deb (apt), .rpm (dnf), pkg.tar.zst (pacman), Flatpak</div>
+              <div><span class="text-term-mauve font-semibold">Desktops</span>: KDE Plasma, GNOME, XFCE, Cinnamon + Tiling WMs</div>
+              <div><span class="text-term-mauve font-semibold">Mission</span>: Zero-hype, technically accurate guide for newcomers</div>
+
+              <!-- Color Swatch Bar -->
+              <div class="pt-3 flex items-center gap-1.5">
+                <span class="w-5 h-4 rounded-sm bg-[#f38ba8] inline-block"></span>
+                <span class="w-5 h-4 rounded-sm bg-[#fab387] inline-block"></span>
+                <span class="w-5 h-4 rounded-sm bg-[#f9e2af] inline-block"></span>
+                <span class="w-5 h-4 rounded-sm bg-[#a6e3a1] inline-block"></span>
+                <span class="w-5 h-4 rounded-sm bg-[#94e2d5] inline-block"></span>
+                <span class="w-5 h-4 rounded-sm bg-[#89b4fa] inline-block"></span>
+                <span class="w-5 h-4 rounded-sm bg-[#cba6f7] inline-block"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- What Actually IS Linux? (Dispelling Confusion Early) -->
+        <div class="term-card rounded-lg p-5 sm:p-6 space-y-3">
+          <h1 class="font-mono-code text-lg sm:text-xl font-bold text-term-green flex items-center gap-2">
+            <span>#</span> First Things First: What Actually Is "Linux"?
+          </h1>
+          <p class="text-sm sm:text-base text-term-main">
+            Strictly speaking, <strong>Linux</strong> is the <em>kernel</em>—the core program that sits between your physical hardware (CPU, RAM, NVMe drive, GPU) and your applications. On its own, a kernel cannot give you a file manager, a web browser, or even a shell prompt.
+          </p>
+          <p class="text-sm sm:text-base text-term-sub">
+            To create a complete operating system—called a <strong>Linux Distribution (Distro)</strong>—maintainers bundle the Linux kernel with standard command-line utilities (typically <strong>GNU coreutils</strong>), a C library (<code>glibc</code> or <code>musl</code>), an init system to boot services, a package manager to install software, a display server (<strong>Wayland</strong> or <strong>Xorg</strong>), and a <strong>Desktop Environment</strong>. Because every piece is modular, different distros can feel drastically different while running the exact same Linux kernel underneath.
+          </p>
+        </div>
+
+        <!-- Directory Listing: All 6 Modules -->
+        <div class="space-y-3">
+          <div class="font-mono-code text-sm text-term-blue flex items-center justify-between">
+            <span>$ ls -lh ~/guides/ --sort=extension</span>
+            <span class="text-xs text-term-muted">Click any executable script below to open module</span>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <!-- Card 1 -->
+            <div onclick="navigateTo('distro')" class="term-card rounded-lg p-5 cursor-pointer hover:border-[var(--accent-green)] group flex flex-col justify-between">
+              <div>
+                <div class="font-mono-code text-xs text-term-muted flex justify-between mb-2">
+                  <span>-rwxr-xr-x 1 root</span>
+                  <span class="text-term-green">MODULE 01</span>
+                </div>
+                <h2 class="font-mono-code text-base font-bold text-term-main group-hover:text-term-green transition">
+                  ./01_distro_choice.sh
+                </h2>
+                <p class="text-xs sm:text-sm text-term-sub mt-2">
+                  How distributions are layered, why beginners get trapped "distro-hopping", realistic breakdowns of Linux Mint, Ubuntu, Pop!_OS, Fedora, and Zorin OS, plus an interactive Distro Finder script.
+                </p>
+              </div>
+              <div class="mt-4 pt-3 border-t border-[var(--border-dim)] font-mono-code text-xs text-term-blue flex justify-between items-center">
+                <span>Includes: Interactive Quiz + SVG Stack</span>
+                <span class="group-hover:translate-x-1 transition-transform">Execute &rarr;</span>
+              </div>
+            </div>
+
+            <!-- Card 2 -->
+            <div onclick="navigateTo('commands')" class="term-card rounded-lg p-5 cursor-pointer hover:border-[var(--accent-green)] group flex flex-col justify-between">
+              <div>
+                <div class="font-mono-code text-xs text-term-muted flex justify-between mb-2">
+                  <span>-rwxr-xr-x 1 root</span>
+                  <span class="text-term-green">MODULE 02</span>
+                </div>
+                <h2 class="font-mono-code text-base font-bold text-term-main group-hover:text-term-green transition">
+                  ./02_basic_commands.sh
+                </h2>
+                <p class="text-xs sm:text-sm text-term-sub mt-2">
+                  Essential terminal survival guide: navigation, file manipulation, <code>grep</code>, octal permissions (<code>chmod</code>), system monitoring, and a live interactive sandbox terminal.
+                </p>
+              </div>
+              <div class="mt-4 pt-3 border-t border-[var(--border-dim)] font-mono-code text-xs text-term-blue flex justify-between items-center">
+                <span>Includes: Live Sandbox + chmod Calc</span>
+                <span class="group-hover:translate-x-1 transition-transform">Execute &rarr;</span>
+              </div>
+            </div>
+
+            <!-- Card 3 -->
+            <div onclick="navigateTo('de')" class="term-card rounded-lg p-5 cursor-pointer hover:border-[var(--accent-green)] group flex flex-col justify-between">
+              <div>
+                <div class="font-mono-code text-xs text-term-muted flex justify-between mb-2">
+                  <span>-rwxr-xr-x 1 root</span>
+                  <span class="text-term-green">MODULE 03</span>
+                </div>
+                <h2 class="font-mono-code text-base font-bold text-term-main group-hover:text-term-green transition">
+                  ./03_desktop_envs.sh
+                </h2>
+                <p class="text-xs sm:text-sm text-term-sub mt-2">
+                  Desktop Environments vs. Window Managers. Visual layouts and accurate memory footprints for KDE Plasma 6, GNOME, XFCE, Cinnamon, and tiling WMs like i3, Sway, and Hyprland.
+                </p>
+              </div>
+              <div class="mt-4 pt-3 border-t border-[var(--border-dim)] font-mono-code text-xs text-term-blue flex justify-between items-center">
+                <span>Includes: 4 DE UI Mockups + htop Bars</span>
+                <span class="group-hover:translate-x-1 transition-transform">Execute &rarr;</span>
+              </div>
+            </div>
+
+            <!-- Card 4 -->
+            <div onclick="navigateTo('display')" class="term-card rounded-lg p-5 cursor-pointer hover:border-[var(--accent-green)] group flex flex-col justify-between">
+              <div>
+                <div class="font-mono-code text-xs text-term-muted flex justify-between mb-2">
+                  <span>-rwxr-xr-x 1 root</span>
+                  <span class="text-term-green">MODULE 04</span>
+                </div>
+                <h2 class="font-mono-code text-base font-bold text-term-main group-hover:text-term-green transition">
+                  ./04_wayland_vs_xorg.sh
+                </h2>
+                <p class="text-xs sm:text-sm text-term-sub mt-2">
+                  How pixels reach your monitor. Understand why Linux moved from the 1984 X11 architecture to Wayland, how XWayland runs legacy apps, and the modern state of NVIDIA explicit sync.
+                </p>
+              </div>
+              <div class="mt-4 pt-3 border-t border-[var(--border-dim)] font-mono-code text-xs text-term-blue flex justify-between items-center">
+                <span>Includes: Pipeline Diagram + Matrix</span>
+                <span class="group-hover:translate-x-1 transition-transform">Execute &rarr;</span>
+              </div>
+            </div>
+
+            <!-- Card 5 -->
+            <div onclick="navigateTo('bigthree')" class="term-card rounded-lg p-5 cursor-pointer hover:border-[var(--accent-green)] group flex flex-col justify-between">
+              <div>
+                <div class="font-mono-code text-xs text-term-muted flex justify-between mb-2">
+                  <span>-rwxr-xr-x 1 root</span>
+                  <span class="text-term-green">MODULE 05</span>
+                </div>
+                <h2 class="font-mono-code text-base font-bold text-term-main group-hover:text-term-green transition">
+                  ./05_debian_fedora_arch.sh
+                </h2>
+                <p class="text-xs sm:text-sm text-term-sub mt-2">
+                  The three foundational upstream lineages: Debian (The Rock), Fedora (The Innovator), and Arch Linux (The DIY Rolling Release). Package managers, release cycles, and family tree.
+                </p>
+              </div>
+              <div class="mt-4 pt-3 border-t border-[var(--border-dim)] font-mono-code text-xs text-term-blue flex justify-between items-center">
+                <span>Includes: Family Tree SVG + Rosetta</span>
+                <span class="group-hover:translate-x-1 transition-transform">Execute &rarr;</span>
+              </div>
+            </div>
+
+            <!-- Card 6 -->
+            <div onclick="navigateTo('advanced')" class="term-card rounded-lg p-5 cursor-pointer hover:border-[var(--accent-peach)] group flex flex-col justify-between">
+              <div>
+                <div class="font-mono-code text-xs text-term-muted flex justify-between mb-2">
+                  <span>-rwxr-xr-x 1 root</span>
+                  <span class="text-term-peach">MODULE 06</span>
+                </div>
+                <h2 class="font-mono-code text-base font-bold text-term-main group-hover:text-term-peach transition">
+                  ./06_gentoo_and_void.sh
+                </h2>
+                <p class="text-xs sm:text-sm text-term-sub mt-2">
+                  Deep dive into Gentoo (Portage, source compilation, USE flags, binhosts) and Void Linux (<code>runit</code> init, <code>xbps</code>, <code>glibc</code>/<code>musl</code>)—plus an honest verdict for beginners.
+                </p>
+              </div>
+              <div class="mt-4 pt-3 border-t border-[var(--border-dim)] font-mono-code text-xs text-term-peach flex justify-between items-center">
+                <span>Includes: Interactive USE Flag Sim</span>
+                <span class="group-hover:translate-x-1 transition-transform">Execute &rarr;</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ======================================================================
+           PAGE 01: DISTRO CHOICE (./01_distro_choice.sh)
+           ====================================================================== -->
+      <section id="page-distro" class="page-section hidden space-y-8">
+        <!-- Header -->
+        <div class="border-b border-[var(--border-dim)] pb-4">
+          <div class="font-mono-code text-xs text-term-green uppercase tracking-wider">Module 01 // Distribution Architecture &amp; Selection</div>
+          <h1 class="font-mono-code text-2xl sm:text-3xl font-bold text-term-main mt-1">Choosing Your First Linux Distribution</h1>
+          <p class="text-sm sm:text-base text-term-sub mt-2">
+            Beginners often spend weeks watching "Top 10 Distros" videos and worrying about making the wrong choice. Understanding what actually differs between distributions removes 90% of that anxiety.
+          </p>
+        </div>
+
+        <!-- feh Frame: Anatomy of a Linux Distribution SVG -->
+        <div class="feh-frame">
+          <div class="feh-header">
+            <span>feh — assets/distro-layer-architecture.svg [1100x360]</span>
+            <span class="text-term-green">zoom: 100% | [readonly]</span>
+          </div>
+          <div class="p-4 sm:p-6 bg-term-mantle overflow-x-auto">
+            <svg viewBox="0 0 960 310" class="w-full min-w-[680px] h-auto font-mono-code">
+              <!-- Layer 5: User Applications -->
+              <rect x="30" y="15" width="900" height="46" rx="6" fill="#24253a" stroke="#cba6f7" stroke-width="2"/>
+              <text x="50" y="43" fill="#cba6f7" font-size="14" font-weight="bold">5. USER APPLICATIONS</text>
+              <text x="290" y="43" fill="#cdd6f4" font-size="13">Firefox, LibreOffice, Steam, Blender, VS Code (Installed via APT / DNF / Pacman / Flatpak)</text>
+
+              <!-- Layer 4: Desktop Environment / Window Manager -->
+              <rect x="30" y="73" width="900" height="46" rx="6" fill="#24253a" stroke="#89b4fa" stroke-width="2"/>
+              <text x="50" y="101" fill="#89b4fa" font-size="14" font-weight="bold">4. DESKTOP ENVIRONMENT</text>
+              <text x="290" y="101" fill="#cdd6f4" font-size="13">KDE Plasma (Qt), GNOME (GTK), XFCE, Cinnamon, or Tiling WM (Sway / i3 / Hyprland)</text>
+
+              <!-- Layer 3: Display Server & Audio Stack -->
+              <rect x="30" y="131" width="900" height="46" rx="6" fill="#24253a" stroke="#94e2d5" stroke-width="2"/>
+              <text x="50" y="159" fill="#94e2d5" font-size="14" font-weight="bold">3. DISPLAY &amp; MEDIA</text>
+              <text x="290" y="159" fill="#cdd6f4" font-size="13">Wayland Compositor or X.Org Server + PipeWire (Audio/Video Routing) + Mesa / GPU Drivers</text>
+
+              <!-- Layer 2: GNU Userland, C Library & Init System -->
+              <rect x="30" y="189" width="900" height="46" rx="6" fill="#24253a" stroke="#f9e2af" stroke-width="2"/>
+              <text x="50" y="217" fill="#f9e2af" font-size="14" font-weight="bold">2. CORE USERLAND &amp; INIT</text>
+              <text x="290" y="217" fill="#cdd6f4" font-size="13">C Library (glibc / musl) + GNU Coreutils (ls, cp, bash) + Init System (systemd / runit / OpenRC)</text>
+
+              <!-- Layer 1: The Linux Kernel & Hardware -->
+              <rect x="30" y="247" width="900" height="48" rx="6" fill="#1e1e2e" stroke="#a6e3a1" stroke-width="2.5"/>
+              <text x="50" y="276" fill="#a6e3a1" font-size="14" font-weight="bold">1. LINUX KERNEL (v6.x)</text>
+              <text x="290" y="276" fill="#cdd6f4" font-size="13">CPU Scheduler, Memory Management, VFS (ext4/Btrfs), Hardware Drivers &amp; DRM/KMS</text>
+            </svg>
+          </div>
+        </div>
+
+        <!-- What Actually Changes Between Distros? -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="term-subcard rounded-lg p-4">
+            <div class="font-mono-code text-xs text-term-green font-bold">01. RELEASE CADENCE</div>
+            <p class="text-xs sm:text-sm text-term-sub mt-1.5">
+              How often packages and kernels are updated. <strong>Point-release (LTS)</strong> distros freeze major versions for stability (Ubuntu LTS, Mint, Debian), while <strong>Rolling</strong> or <strong>Semi-rolling</strong> distros ship newer kernels and software year-round (Fedora, Arch).
+            </p>
+          </div>
+          <div class="term-subcard rounded-lg p-4">
+            <div class="font-mono-code text-xs text-term-blue font-bold">02. PACKAGE MANAGER &amp; POLICIES</div>
+            <p class="text-xs sm:text-sm text-term-sub mt-1.5">
+              How you install software (<code>apt</code>, <code>dnf</code>, <code>pacman</code>) and whether non-free firmware, media codecs, or sandboxed formats (<strong>Flatpak</strong> vs Canonical's <strong>Snap</strong>) are pre-configured out of the box.
+            </p>
+          </div>
+          <div class="term-subcard rounded-lg p-4">
+            <div class="font-mono-code text-xs text-term-mauve font-bold">03. DEFAULT DESKTOP CONFIGURATION</div>
+            <p class="text-xs sm:text-sm text-term-sub mt-1.5">
+              Which Desktop Environment ships on the ISO and how the distro team styles or extends it. Remember: you can install KDE on Fedora or GNOME on Mint later, though starting with a distro's flagship edition gives the most polished experience.
+            </p>
+          </div>
+        </div>
+
+        <!-- Curated Beginner Distributions (Accurate Breakdowns) -->
+        <div class="space-y-4">
+          <h2 class="font-mono-code text-lg sm:text-xl font-bold text-term-blue">
+            $ cat /etc/recommended-beginner-distros.conf
+          </h2>
+
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+            <!-- Linux Mint -->
+            <div class="term-card rounded-lg p-5 flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between gap-2 border-b border-[var(--border-dim)] pb-3">
+                  <div>
+                    <h3 class="font-mono-code text-lg font-bold text-term-green">Linux Mint (Cinnamon / XFCE)</h3>
+                    <span class="font-mono-code text-xs text-term-muted">Base: Ubuntu LTS (or Debian via LMDE) • Pkg: APT + Flatpak</span>
+                  </div>
+                  <span class="px-2.5 py-1 rounded text-xs font-mono-code bg-term-elevated text-term-green font-semibold">Top Overall Pick</span>
+                </div>
+                <p class="text-xs sm:text-sm text-term-main mt-3">
+                  Built specifically for desktop usability. Linux Mint uses Ubuntu's rock-solid Long Term Support (LTS) package base and hardware compatibility, but strips out Canonical's controversial forced <code>snapd</code> packages in favor of native <code>.deb</code> packages and pre-configured <strong>Flathub (Flatpak)</strong> integration.
+                </p>
+                <ul class="mt-3 space-y-1.5 text-xs sm:text-sm text-term-sub font-mono-code">
+                  <li><span class="text-term-green">+</span> Familiar bottom taskbar &amp; start menu (Cinnamon Desktop)</li>
+                  <li><span class="text-term-green">+</span> Includes <strong>Timeshift</strong> for automatic system restore snapshots</li>
+                  <li><span class="text-term-green">+</span> Driver Manager GUI makes installing proprietary Broadcom/NVIDIA drivers effortless</li>
+                  <li><span class="text-term-yellow">~</span> Ships an LTS kernel by default (use the Update Manager's "Edge" HWE kernel if you have brand-new current-year hardware)</li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- Fedora Workstation / KDE Plasma Desktop -->
+            <div class="term-card rounded-lg p-5 flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between gap-2 border-b border-[var(--border-dim)] pb-3">
+                  <div>
+                    <h3 class="font-mono-code text-lg font-bold text-term-blue">Fedora (Workstation / KDE Desktop)</h3>
+                    <span class="font-mono-code text-xs text-term-muted">Base: Independent (Red Hat) • Pkg: DNF5 + Flatpak</span>
+                  </div>
+                  <span class="px-2.5 py-1 rounded text-xs font-mono-code bg-term-elevated text-term-blue font-semibold">Best for New Hardware</span>
+                </div>
+                <p class="text-xs sm:text-sm text-term-main mt-3">
+                  Backed by Red Hat, Fedora releases a new version every ~6 months (supported for 13 months) and ships recent Linux kernels alongside rigorous automated QA. It offers two flagship desktop editions: <strong>Fedora Workstation (GNOME)</strong> and <strong>Fedora KDE Plasma Desktop</strong>.
+                </p>
+                <ul class="mt-3 space-y-1.5 text-xs sm:text-sm text-term-sub font-mono-code">
+                  <li><span class="text-term-green">+</span> Recent Linux kernels give superior support for new AMD/Intel laptops &amp; Wi-Fi chips</li>
+                  <li><span class="text-term-green">+</span> Pioneers modern Linux tech cleanly (Wayland, PipeWire, Btrfs, systemd-oomd)</li>
+                  <li><span class="text-term-green">+</span> Pure, unmodified upstream GNOME and KDE experiences</li>
+                  <li><span class="text-term-yellow">~</span> Requires clicking "Enable Third-Party Repositories" on first boot for NVIDIA drivers and full H.264/AAC codecs (RPM Fusion)</li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- Ubuntu & Pop!_OS -->
+            <div class="term-card rounded-lg p-5 flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between gap-2 border-b border-[var(--border-dim)] pb-3">
+                  <div>
+                    <h3 class="font-mono-code text-lg font-bold text-term-peach">Ubuntu LTS &amp; Pop!_OS</h3>
+                    <span class="font-mono-code text-xs text-term-muted">Base: Debian / Ubuntu LTS • Pkg: APT + Snap / Flatpak</span>
+                  </div>
+                  <span class="px-2.5 py-1 rounded text-xs font-mono-code bg-term-elevated text-term-peach font-semibold">Largest Documentation</span>
+                </div>
+                <p class="text-xs sm:text-sm text-term-main mt-3">
+                  <strong>Ubuntu</strong> (by Canonical) is the industry standard for cloud, AI/ML toolchains (CUDA, ROS, Docker), and enterprise support. <strong>Pop!_OS</strong> (by hardware vendor System76) builds on Ubuntu LTS with a dedicated NVIDIA ISO (drivers baked straight into the installer) and their custom Rust-based <strong>COSMIC</strong> desktop environment.
+                </p>
+                <ul class="mt-3 space-y-1.5 text-xs sm:text-sm text-term-sub font-mono-code">
+                  <li><span class="text-term-green">+</span> 95% of Linux troubleshooting articles and official `.deb` vendor downloads target Ubuntu</li>
+                  <li><span class="text-term-green">+</span> Pop!_OS includes built-in hybrid GPU switching (Integrated / NVIDIA / Compute modes)</li>
+                  <li><span class="text-term-yellow">~</span> Standard Ubuntu installs Firefox and several system apps as Canonical <strong>Snaps</strong> rather than native `.deb` packages</li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- Zorin OS -->
+            <div class="term-card rounded-lg p-5 flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between gap-2 border-b border-[var(--border-dim)] pb-3">
+                  <div>
+                    <h3 class="font-mono-code text-lg font-bold text-term-teal">Zorin OS Core</h3>
+                    <span class="font-mono-code text-xs text-term-muted">Base: Ubuntu LTS • Pkg: APT + Flatpak + Snap</span>
+                  </div>
+                  <span class="px-2.5 py-1 rounded text-xs font-mono-code bg-term-elevated text-term-teal font-semibold">Polished Switcher UI</span>
+                </div>
+                <p class="text-xs sm:text-sm text-term-main mt-3">
+                  Designed specifically for non-technical users migrating from Windows 10/11 or macOS. Built on a heavily customized GNOME shell over an Ubuntu LTS base, Zorin OS Core is completely free and includes the <strong>Zorin Appearance</strong> layout switcher.
+                </p>
+                <ul class="mt-3 space-y-1.5 text-xs sm:text-sm text-term-sub font-mono-code">
+                  <li><span class="text-term-green">+</span> Cohesive typography, animations, and zero-terminal onboarding</li>
+                  <li><span class="text-term-green">+</span> Detects `.exe` installers and suggests native Linux equivalents or Wine/Bottles</li>
+                  <li><span class="text-term-yellow">~</span> Underlying Ubuntu LTS base jumps more slowly than Fedora or standard Ubuntu</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- INTERACTIVE FEATURE: ./distro-picker.sh Questionnaire -->
+        <div class="term-card rounded-lg p-5 sm:p-6 border-2 border-[var(--accent-green)]">
+          <div class="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--border-dim)] pb-3 mb-4">
+            <div class="font-mono-code">
+              <span class="text-term-green font-bold">$ ./distro-picker.sh --interactive</span>
+              <p class="text-xs text-term-sub mt-0.5">Answer 4 quick hardware &amp; workflow questions to calculate your ideal starting distribution.</p>
+            </div>
+            <button onclick="resetDistroQuiz()" class="font-mono-code text-xs bg-term-elevated hover:bg-term-surface text-term-sub px-3 py-1.5 rounded border border-[var(--border-bright)]">
+              [Reset Script]
+            </button>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 font-mono-code text-xs sm:text-sm">
+            <!-- Q1 -->
+            <div class="term-subcard p-4 rounded">
+              <label class="block text-term-blue font-semibold mb-2">1. How old is your computer &amp; how much RAM does it have?</label>
+              <select id="quiz-hw" onchange="runDistroQuiz()" class="w-full bg-term-surface text-term-main border border-[var(--border-bright)] rounded p-2">
+                <option value="modern">Modern PC / Laptop (2020–2026, 8GB–64GB RAM)</option>
+                <option value="bleeding">Brand-new hardware (bought in the last 6 months)</option>
+                <option value="older">Older machine (2012–2018, 4GB RAM or dual-core CPU)</option>
+              </select>
+            </div>
+
+            <!-- Q2 -->
+            <div class="term-subcard p-4 rounded">
+              <label class="block text-term-blue font-semibold mb-2">2. What is your primary Graphics Card (GPU)?</label>
+              <select id="quiz-gpu" onchange="runDistroQuiz()" class="w-full bg-term-surface text-term-main border border-[var(--border-bright)] rounded p-2">
+                <option value="amd_intel">AMD Radeon or Intel Integrated / Arc Graphics</option>
+                <option value="nvidia">NVIDIA GeForce / RTX GPU</option>
+              </select>
+            </div>
+
+            <!-- Q3 -->
+            <div class="term-subcard p-4 rounded">
+              <label class="block text-term-blue font-semibold mb-2">3. What is your primary daily use case?</label>
+              <select id="quiz-use" onchange="runDistroQuiz()" class="w-full bg-term-surface text-term-main border border-[var(--border-bright)] rounded p-2">
+                <option value="general">Everyday browsing, office work, media &amp; learning Linux</option>
+                <option value="gaming">PC Gaming (Steam Proton, Heroic, Lutris)</option>
+                <option value="dev">Software development, containers, AI/ML or DevOps</option>
+              </select>
+            </div>
+
+            <!-- Q4 -->
+            <div class="term-subcard p-4 rounded">
+              <label class="block text-term-blue font-semibold mb-2">4. Which desktop layout feels most comfortable to you?</label>
+              <select id="quiz-ui" onchange="runDistroQuiz()" class="w-full bg-term-surface text-term-main border border-[var(--border-bright)] rounded p-2">
+                <option value="windows">Traditional Windows-like taskbar, system tray &amp; start menu</option>
+                <option value="modern">Clean, modern workspace-driven UI (macOS / GNOME style)</option>
+                <option value="custom">Maximum customization &amp; widgets (KDE Plasma style)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Output Console -->
+          <div id="quiz-output-box" class="mt-4 bg-term-mantle border border-[var(--border-bright)] rounded p-4 font-mono-code text-xs sm:text-sm space-y-2">
+            <!-- Populated dynamically by runDistroQuiz() -->
+          </div>
+        </div>
+      </section>
+
+      <!-- ======================================================================
+           PAGE 02: BASIC COMMANDS ON LINUX TERMINAL (./02_basic_commands.sh)
+           ====================================================================== -->
+      <section id="page-commands" class="page-section hidden space-y-8">
+        <!-- Header -->
+        <div class="border-b border-[var(--border-dim)] pb-4">
+          <div class="font-mono-code text-xs text-term-green uppercase tracking-wider">Module 02 // POSIX Shell &amp; Coreutils</div>
+          <h1 class="font-mono-code text-2xl sm:text-3xl font-bold text-term-main mt-1">Basic Commands on the Linux Terminal</h1>
+          <p class="text-sm sm:text-base text-term-sub mt-2">
+            You do not <em>have</em> to use the terminal for basic desktop tasks on modern Linux, but learning 15 core commands turns a 10-click GUI troubleshooting guide into a 2-second copy-paste operation.
+          </p>
+        </div>
+
+        <!-- Anatomy of a Linux Command Prompt -->
+        <div class="term-card rounded-lg p-5 font-mono-code text-xs sm:text-sm">
+          <div class="text-term-muted mb-2"># Understanding the standard Bash prompt &amp; command structure:</div>
+          <div class="bg-term-mantle p-3.5 rounded border border-[var(--border-dim)] overflow-x-auto whitespace-nowrap text-sm sm:text-base">
+            <span class="text-term-green font-bold" title="Username">guest</span><span>@</span><span class="text-term-teal font-bold" title="Hostname">thinkpad</span><span>:</span><span class="text-term-blue font-bold" title="Current Working Directory (~ means /home/guest)">~/Documents</span><span class="text-term-yellow font-bold" title="$ = regular user, # = root superuser">$</span>
+            <span class="text-term-main font-bold ml-2">ls</span>
+            <span class="text-term-mauve font-bold ml-1">-la</span>
+            <span class="text-term-peach ml-1">/var/log</span>
+          </div>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-3 text-xs">
+            <div class="bg-term-mantle p-2 rounded"><span class="text-term-green font-bold">~ (Tilde)</span>: Shorthand for your home folder (<code>/home/username</code>)</div>
+            <div class="bg-term-mantle p-2 rounded"><span class="text-term-yellow font-bold">$ vs #</span>: <code>$</code> means normal user; <code>#</code> means root (admin) shell</div>
+            <div class="bg-term-mantle p-2 rounded"><span class="text-term-mauve font-bold">-la (Flags)</span>: Modifies how a command behaves (<code>-l</code> long list, <code>-a</code> all/hidden)</div>
+            <div class="bg-term-mantle p-2 rounded"><span class="text-term-peach font-bold">Arguments</span>: The target path or file the command operates on</div>
+          </div>
+        </div>
+
+        <!-- Category Filter Buttons -->
+        <div class="flex flex-wrap items-center gap-2 font-mono-code text-xs">
+          <span class="text-term-muted mr-1">Filter category:</span>
+          <button onclick="filterCommands('all')" id="cmd-filter-all" class="cmd-filter-btn px-3 py-1.5 rounded bg-term-elevated text-term-green border border-[var(--accent-green)]">All (15)</button>
+          <button onclick="filterCommands('nav')" id="cmd-filter-nav" class="cmd-filter-btn px-3 py-1.5 rounded bg-term-surface text-term-sub border border-[var(--border-dim)]">Navigation</button>
+          <button onclick="filterCommands('files')" id="cmd-filter-files" class="cmd-filter-btn px-3 py-1.5 rounded bg-term-surface text-term-sub border border-[var(--border-dim)]">File Ops</button>
+          <button onclick="filterCommands('search')" id="cmd-filter-search" class="cmd-filter-btn px-3 py-1.5 rounded bg-term-surface text-term-sub border border-[var(--border-dim)]">Viewing &amp; Search</button>
+          <button onclick="filterCommands('perms')" id="cmd-filter-perms" class="cmd-filter-btn px-3 py-1.5 rounded bg-term-surface text-term-sub border border-[var(--border-dim)]">Permissions &amp; Root</button>
+          <button onclick="filterCommands('sys')" id="cmd-filter-sys" class="cmd-filter-btn px-3 py-1.5 rounded bg-term-surface text-term-sub border border-[var(--border-dim)]">System &amp; Network</button>
+        </div>
+
+        <!-- Command Cheat-Sheet Grid (Populated via JS for clean copy & filtering) -->
+        <div id="commands-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+
+        <!-- Red Safety Callout: Why `rm -rf /` is dangerous -->
+        <div class="term-card rounded-lg p-5 border-l-4 border-l-[var(--accent-red)] bg-term-surface">
+          <div class="font-mono-code text-sm font-bold text-term-red flex items-center gap-2">
+            <span>[CRITICAL SAFETY NOTE]</span> Why does `rm` have no Recycle Bin?
+          </div>
+          <p class="text-xs sm:text-sm text-term-main mt-1.5">
+            Unlike deleting a file in a graphical file manager (which moves it to <code>~/.local/share/Trash</code>), running <code>rm</code> unlinks the file directly from the filesystem. Always be cautious with <code>sudo rm -rf</code> (recursive + force). While modern GNU <code>rm</code> includes built-in protection (<code>--preserve-root</code>) that blocks accidental <code>sudo rm -rf /</code> unless explicitly overridden, running <code>rm -rf ~/ *</code> (with an accidental space after the tilde) will immediately wipe your entire home directory. Use <code>rm -ri folder/</code> when in doubt!
+          </p>
+        </div>
+
+        <!-- Two Interactive Tools Side-by-Side: 1. chmod Octal Calculator, 2. Live Sandbox Terminal -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <!-- Interactive chmod Octal Calculator -->
+          <div class="lg:col-span-5 term-card rounded-lg p-5 flex flex-col justify-between">
+            <div>
+              <div class="font-mono-code text-xs text-term-mauve uppercase">Interactive Utility</div>
+              <h3 class="font-mono-code text-base font-bold text-term-main mt-0.5">chmod Permission Calculator</h3>
+              <p class="text-xs text-term-sub mt-1">
+                Every Linux file has 3 permission groups: <strong>Owner (u)</strong>, <strong>Group (g)</strong>, and <strong>Others (o)</strong>. Each bit has an octal value: Read (<code>r=4</code>), Write (<code>w=2</code>), Execute (<code>x=1</code>).
+              </p>
+
+              <div class="grid grid-cols-3 gap-2.5 mt-4 font-mono-code text-xs">
+                <!-- Owner -->
+                <div class="term-subcard p-3 rounded space-y-1.5">
+                  <div class="text-term-green font-bold border-b border-[var(--border-dim)] pb-1">Owner (u)</div>
+                  <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="chmod-ur" checked onchange="updateChmodCalc()"> r (4)</label>
+                  <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="chmod-uw" checked onchange="updateChmodCalc()"> w (2)</label>
+                  <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="chmod-ux" checked onchange="updateChmodCalc()"> x (1)</label>
+                </div>
+                <!-- Group -->
+                <div class="term-subcard p-3 rounded space-y-1.5">
+                  <div class="text-term-blue font-bold border-b border-[var(--border-dim)] pb-1">Group (g)</div>
+                  <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="chmod-gr" checked onchange="updateChmodCalc()"> r (4)</label>
+                  <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="chmod-gw" onchange="updateChmodCalc()"> w (2)</label>
+                  <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="chmod-gx" checked onchange="updateChmodCalc()"> x (1)</label>
+                </div>
+                <!-- Others -->
+                <div class="term-subcard p-3 rounded space-y-1.5">
+                  <div class="text-term-peach font-bold border-b border-[var(--border-dim)] pb-1">Others (o)</div>
+                  <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="chmod-or" checked onchange="updateChmodCalc()"> r (4)</label>
+                  <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="chmod-ow" onchange="updateChmodCalc()"> w (2)</label>
+                  <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="chmod-ox" checked onchange="updateChmodCalc()"> x (1)</label>
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-4 bg-term-mantle p-3.5 rounded border border-[var(--border-bright)] font-mono-code text-xs space-y-1.5">
+              <div class="flex justify-between">
+                <span class="text-term-muted">Command:</span>
+                <span id="chmod-cmd-out" class="text-term-green font-bold">chmod 755 script.sh</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-term-muted">Symbolic (ls -l):</span>
+                <span id="chmod-sym-out" class="text-term-blue font-bold">-rwxr-xr-x</span>
+              </div>
+              <div class="flex gap-1.5 pt-2">
+                <button onclick="setChmodPreset(755)" class="px-2 py-1 bg-term-surface rounded hover:text-term-green">755 (Executable)</button>
+                <button onclick="setChmodPreset(644)" class="px-2 py-1 bg-term-surface rounded hover:text-term-green">644 (Standard File)</button>
+                <button onclick="setChmodPreset(600)" class="px-2 py-1 bg-term-surface rounded hover:text-term-green">600 (SSH Key)</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Interactive Live Mini-Sandbox Terminal -->
+          <div class="lg:col-span-7 term-card rounded-lg p-5 flex flex-col justify-between border border-[var(--accent-blue)]">
+            <div>
+              <div class="flex items-center justify-between border-b border-[var(--border-dim)] pb-2 mb-3 font-mono-code">
+                <div>
+                  <span class="text-xs text-term-blue uppercase">Interactive Bash Sandbox</span>
+                  <h3 class="text-base font-bold text-term-main">Practice Commands Safely</h3>
+                </div>
+                <button onclick="clearSandbox()" class="text-xs bg-term-elevated px-2.5 py-1 rounded text-term-sub hover:text-term-main">[clear]</button>
+              </div>
+
+              <!-- Quick Clickable Command Pills -->
+              <div class="flex flex-wrap gap-1.5 mb-3 font-mono-code text-xs">
+                <span class="text-term-muted py-0.5">Try clicking:</span>
+                <button onclick="runSandboxCmd('ls -la')" class="px-2 py-0.5 bg-term-mantle border border-[var(--border-dim)] rounded hover:border-[var(--accent-green)] text-term-green">ls -la</button>
+                <button onclick="runSandboxCmd('pwd')" class="px-2 py-0.5 bg-term-mantle border border-[var(--border-dim)] rounded hover:border-[var(--accent-green)] text-term-green">pwd</button>
+                <button onclick="runSandboxCmd('cat welcome.txt')" class="px-2 py-0.5 bg-term-mantle border border-[var(--border-dim)] rounded hover:border-[var(--accent-green)] text-term-green">cat welcome.txt</button>
+                <button onclick="runSandboxCmd('df -h')" class="px-2 py-0.5 bg-term-mantle border border-[var(--border-dim)] rounded hover:border-[var(--accent-green)] text-term-green">df -h</button>
+                <button onclick="runSandboxCmd('free -h')" class="px-2 py-0.5 bg-term-mantle border border-[var(--border-dim)] rounded hover:border-[var(--accent-green)] text-term-green">free -h</button>
+                <button onclick="runSandboxCmd('ip a')" class="px-2 py-0.5 bg-term-mantle border border-[var(--border-dim)] rounded hover:border-[var(--accent-green)] text-term-green">ip a</button>
+                <button onclick="runSandboxCmd('grep -rn TODO')" class="px-2 py-0.5 bg-term-mantle border border-[var(--border-dim)] rounded hover:border-[var(--accent-green)] text-term-green">grep -rn TODO</button>
+              </div>
+
+              <!-- Terminal Output Log -->
+              <div id="sandbox-output" class="bg-term-mantle border border-[var(--border-dim)] rounded p-3 h-52 overflow-y-auto font-mono-code text-xs space-y-2">
+                <div class="text-term-muted"># Welcome to the practice shell! Type a command below or click a preset above.</div>
+                <div><span class="text-term-green">guest@sandbox:~/workspace$</span> ls</div>
+                <div class="text-term-main">deploy.sh  notes.md  <span class="text-term-blue font-bold">projects/</span>  welcome.txt</div>
+              </div>
+            </div>
+
+            <!-- Input Row -->
+            <form onsubmit="handleSandboxSubmit(event)" class="mt-3 flex items-center bg-term-mantle border border-[var(--border-bright)] rounded px-3 py-2 font-mono-code text-xs sm:text-sm">
+              <span id="sandbox-prompt" class="text-term-green shrink-0 mr-2">guest@sandbox:~/workspace$</span>
+              <input id="sandbox-input" type="text" placeholder="Type command (e.g., ls -la, cd projects, whoami, uname -a)..." autocomplete="off" class="w-full bg-transparent text-term-main focus:outline-none">
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <!-- ======================================================================
+           PAGE 03: DESKTOP ENVIRONMENTS (./03_desktop_envs.sh)
+           ====================================================================== -->
+      <section id="page-de" class="page-section hidden space-y-8">
+        <!-- Header -->
+        <div class="border-b border-[var(--border-dim)] pb-4">
+          <div class="font-mono-code text-xs text-term-green uppercase tracking-wider">Module 03 // Graphical Shells &amp; Window Management</div>
+          <h1 class="font-mono-code text-2xl sm:text-3xl font-bold text-term-main mt-1">A Guide to Linux Desktop Environments</h1>
+          <p class="text-sm sm:text-base text-term-sub mt-2">
+            On Windows or macOS, the graphical interface is permanently welded to the operating system. On Linux, the graphical desktop is just a replaceable suite of user-space programs.
+          </p>
+        </div>
+
+        <!-- DE vs Window Manager Conceptual Distinction -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="term-card rounded-lg p-5">
+            <div class="font-mono-code text-xs text-term-green font-bold uppercase">Full Suite</div>
+            <h2 class="font-mono-code text-lg font-bold text-term-main mt-1">What is a Desktop Environment (DE)?</h2>
+            <p class="text-xs sm:text-sm text-term-sub mt-2">
+              A <strong>Desktop Environment</strong> is a complete, cohesive bundle that includes a <strong>Window Manager / Compositor</strong> plus a taskbar/panel, system settings app, file manager, lock screen, power manager, Bluetooth/Wi-Fi applets, and notification daemon. Examples: <strong>KDE Plasma, GNOME, XFCE, Cinnamon, COSMIC, MATE, Budgie</strong>.
+            </p>
+          </div>
+          <div class="term-card rounded-lg p-5">
+            <div class="font-mono-code text-xs text-term-mauve font-bold uppercase">Minimalist / DIY</div>
+            <h2 class="font-mono-code text-lg font-bold text-term-main mt-1">What is a Standalone Window Manager (WM)?</h2>
+            <p class="text-xs sm:text-sm text-term-sub mt-2">
+              A standalone <strong>Window Manager</strong> (or Wayland Compositor) <em>only</em> controls how application windows are placed and drawn on screen. It does not ship with a settings app, file manager, or status bar—you assemble your own using tools like <code>waybar</code>, <code>rofi</code>, and <code>dunst</code>. Popular tiling WMs include <strong>i3wm (X11), Sway (Wayland), and Hyprland (Wayland)</strong>.
+            </p>
+          </div>
+        </div>
+
+        <!-- 4 Major Desktop Environments Showcase with Custom SVG Mockups inside feh Frames -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+          <!-- 1. KDE PLASMA 6 -->
+          <div class="term-card rounded-lg overflow-hidden flex flex-col justify-between">
+            <div>
+              <!-- feh SVG Mockup -->
+              <div class="feh-frame border-0 border-b border-[var(--border-dim)] rounded-none">
+                <div class="feh-header">
+                  <span>feh — assets/kde-plasma-6-layout.svg</span>
+                  <span class="text-term-blue">Qt6 • KWin • Dolphin</span>
+                </div>
+                <div class="p-4 bg-[#11111b]">
+                  <svg viewBox="0 0 480 230" class="w-full h-auto rounded border border-[#313244] font-mono-code">
+                    <rect width="480" height="230" fill="#181825"/>
+                    <!-- Wallpaper Geometric Accent -->
+                    <polygon points="0,0 480,0 480,202 220,202" fill="#1e1e2e"/>
+                    <polygon points="180,0 480,0 380,202" fill="#313244" opacity="0.45"/>
+                    <!-- Application Launcher Menu (Bottom Left Open) -->
+                    <rect x="8" y="68" width="165" height="128" rx="5" fill="#24253a" stroke="#89b4fa" stroke-width="1.5"/>
+                    <text x="18" y="85" fill="#89b4fa" font-size="9" font-weight="bold">Kickoff Launcher</text>
+                    <rect x="16" y="94" width="148" height="14" rx="2" fill="#313244"/>
+                    <rect x="16" y="114" width="148" height="14" rx="2" fill="#1e1e2e"/>
+                    <rect x="16" y="134" width="148" height="14" rx="2" fill="#1e1e2e"/>
+                    <rect x="16" y="172" width="148" height="16" rx="2" fill="#181825"/>
+                    <text x="22" y="183" fill="#a6adc8" font-size="8">Search apps, files, krunner...</text>
+                    <!-- Dolphin File Manager Window -->
+                    <rect x="192" y="24" width="272" height="154" rx="5" fill="#1e1e2e" stroke="#45475a" stroke-width="1.5"/>
+                    <rect x="192" y="24" width="272" height="20" rx="5" fill="#313244"/>
+                    <text x="202" y="37" fill="#cdd6f4" font-size="9">Dolphin — ~/Projects (Split View [F3])</text>
+                    <circle cx="450" cy="34" r="4" fill="#f38ba8"/>
+                    <rect x="200" y="52" width="124" height="118" rx="3" fill="#181825"/>
+                    <rect x="330" y="52" width="126" height="118" rx="3" fill="#181825"/>
+                    <!-- Floating Bottom Panel -->
+                    <rect x="6" y="202" width="468" height="22" rx="5" fill="#24253a" stroke="#89b4fa" stroke-width="1"/>
+                    <circle cx="20" cy="213" r="6" fill="#89b4fa"/>
+                    <rect x="34" y="207" width="22" height="12" rx="2" fill="#313244"/>
+                    <rect x="60" y="207" width="22" height="12" rx="2" fill="#313244"/>
+                    <text x="405" y="216" fill="#cdd6f4" font-size="8">🔊 🌐 14:32</text>
+                  </svg>
+                </div>
+              </div>
+
+              <div class="p-5 space-y-3">
+                <div class="flex items-center justify-between">
+                  <h3 class="font-mono-code text-lg font-bold text-term-blue">1. KDE Plasma (Plasma 6)</h3>
+                  <span class="flag-pill">Qt6 Toolkit</span>
+                </div>
+                <p class="text-xs sm:text-sm text-term-main">
+                  <strong>Default Workflow:</strong> Familiar bottom panel, application launcher, pinned icons, and system tray—immediately intuitive for Windows users, yet endlessly reconfigurable into macOS docks or tiling panels without installing third-party extensions.
+                </p>
+                <p class="text-xs sm:text-sm text-term-sub">
+                  <strong>Myth Busting:</strong> Years ago (in the KDE 4 era), KDE had a reputation for heavy memory usage. Today, <strong>KDE Plasma 6</strong> idles at roughly <strong>650–850 MB RAM</strong>—practically identical to (and often slightly lighter than) GNOME, while offering first-class fractional scaling, HDR, VRR, and the powerhouse <code>Dolphin</code> file manager.
+                </p>
+              </div>
+            </div>
+
+            <!-- htop Resource & Customization Meter -->
+            <div class="px-5 pb-5 pt-2 font-mono-code text-xs space-y-1.5 border-t border-[var(--border-dim)] bg-term-mantle/50">
+              <div class="flex justify-between">
+                <span class="text-term-muted">Idle RAM Footprint:</span>
+                <span class="text-term-green">[|||||..... 720 MB]</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-term-muted">Built-in Customization:</span>
+                <span class="text-term-blue">[|||||||||| 10/10]</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. GNOME -->
+          <div class="term-card rounded-lg overflow-hidden flex flex-col justify-between">
+            <div>
+              <!-- feh SVG Mockup -->
+              <div class="feh-frame border-0 border-b border-[var(--border-dim)] rounded-none">
+                <div class="feh-header">
+                  <span>feh — assets/gnome-47-activities-overview.svg</span>
+                  <span class="text-term-mauve">GTK4 / Libadwaita • Mutter • Nautilus</span>
+                </div>
+                <div class="p-4 bg-[#11111b]">
+                  <svg viewBox="0 0 480 230" class="w-full h-auto rounded border border-[#313244] font-mono-code">
+                    <rect width="480" height="230" fill="#181825"/>
+                    <!-- Top Bar -->
+                    <rect x="0" y="0" width="480" height="18" fill="#11111b"/>
+                    <rect x="10" y="5" width="16" height="8" rx="4" fill="#cba6f7"/>
+                    <circle cx="32" cy="9" r="3.5" fill="#45475a"/>
+                    <text x="212" y="12" fill="#cdd6f4" font-size="8" font-weight="bold">Sun 14:32</text>
+                    <text x="430" y="12" fill="#cdd6f4" font-size="8">🌐 🔊 🔋</text>
+                    <!-- Search Pill -->
+                    <rect x="165" y="28" width="150" height="18" rx="9" fill="#24253a" stroke="#45475a"/>
+                    <text x="200" y="40" fill="#a6adc8" font-size="8">Type to search...</text>
+                    <!-- Centered Workspace Preview -->
+                    <rect x="75" y="56" width="330" height="122" rx="8" fill="#24253a" stroke="#cba6f7" stroke-width="1.5"/>
+                    <!-- Inside Workspace Windows -->
+                    <rect x="95" y="68" width="140" height="96" rx="5" fill="#1e1e2e" stroke="#89b4fa"/>
+                    <text x="105" y="84" fill="#89b4fa" font-size="8">Files (Nautilus)</text>
+                    <rect x="250" y="68" width="135" height="96" rx="5" fill="#1e1e2e" stroke="#a6e3a1"/>
+                    <text x="260" y="84" fill="#a6e3a1" font-size="8">PTYxis Terminal</text>
+                    <!-- Next Workspace Peek on Right -->
+                    <rect x="420" y="66" width="52" height="102" rx="6" fill="#1e1e2e" stroke="#313244"/>
+                    <!-- Bottom Dash (Visible in Overview) -->
+                    <rect x="145" y="190" width="190" height="30" rx="8" fill="#24253a" stroke="#45475a"/>
+                    <rect x="158" y="196" width="18" height="18" rx="4" fill="#89b4fa"/>
+                    <rect x="184" y="196" width="18" height="18" rx="4" fill="#fab387"/>
+                    <rect x="210" y="196" width="18" height="18" rx="4" fill="#a6e3a1"/>
+                    <rect x="236" y="196" width="18" height="18" rx="4" fill="#cba6f7"/>
+                    <circle cx="315" cy="205" r="7" fill="#45475a"/>
+                  </svg>
+                </div>
+              </div>
+
+              <div class="p-5 space-y-3">
+                <div class="flex items-center justify-between">
+                  <h3 class="font-mono-code text-lg font-bold text-term-mauve">2. GNOME</h3>
+                  <span class="flag-pill">GTK4 + Libadwaita</span>
+                </div>
+                <p class="text-xs sm:text-sm text-term-main">
+                  <strong>Default Workflow:</strong> Opinionated, distraction-free, and workspace-driven. Instead of a persistent bottom taskbar or desktop icons, you press the <code>Super</code> (Windows) key or swipe up with three fingers on a touchpad to open the <strong>Activities Overview</strong>, switch dynamic workspaces, or launch apps by typing.
+                </p>
+                <p class="text-xs sm:text-sm text-term-sub">
+                  <strong>Customization Note:</strong> Stock GNOME intentionally minimizes settings toggles for visual consistency across Libadwaita apps. Users who want a persistent dock or legacy system tray icons install the <em>Extension Manager</em> app (e.g., Dash to Dock, AppIndicator). Ubuntu ships GNOME with these extensions pre-installed.
+                </p>
+              </div>
+            </div>
+
+            <div class="px-5 pb-5 pt-2 font-mono-code text-xs space-y-1.5 border-t border-[var(--border-dim)] bg-term-mantle/50">
+              <div class="flex justify-between">
+                <span class="text-term-muted">Idle RAM Footprint:</span>
+                <span class="text-term-green">[||||||.... 820 MB]</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-term-muted">Touchpad Gestures &amp; Polish:</span>
+                <span class="text-term-mauve">[|||||||||| 10/10]</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3. XFCE -->
+          <div class="term-card rounded-lg overflow-hidden flex flex-col justify-between">
+            <div>
+              <div class="feh-frame border-0 border-b border-[var(--border-dim)] rounded-none">
+                <div class="feh-header">
+                  <span>feh — assets/xfce-4.20-lightweight.svg</span>
+                  <span class="text-term-teal">GTK3 • xfwm4 • Thunar</span>
+                </div>
+                <div class="p-4 bg-[#11111b]">
+                  <svg viewBox="0 0 480 230" class="w-full h-auto rounded border border-[#313244] font-mono-code">
+                    <rect width="480" height="230" fill="#181825"/>
+                    <!-- Top Classic Panel -->
+                    <rect x="0" y="0" width="480" height="20" fill="#24253a" stroke="#313244"/>
+                    <text x="10" y="13" fill="#94e2d5" font-size="8" font-weight="bold">🐭 Applications</text>
+                    <rect x="92" y="3" width="90" height="14" rx="2" fill="#313244"/>
+                    <text x="98" y="13" fill="#cdd6f4" font-size="7">[Thunar: /home]</text>
+                    <text x="415" y="13" fill="#a6adc8" font-size="8">[1][2] 14:32</text>
+                    <!-- Desktop Icons on Left -->
+                    <rect x="14" y="32" width="26" height="22" rx="3" fill="#313244" stroke="#94e2d5"/>
+                    <text x="12" y="64" fill="#cdd6f4" font-size="7">Home</text>
+                    <rect x="14" y="78" width="26" height="22" rx="3" fill="#313244" stroke="#89b4fa"/>
+                    <text x="8" y="110" fill="#cdd6f4" font-size="7">File System</text>
+                    <!-- Thunar Window -->
+                    <rect x="90" y="42" width="310" height="145" rx="3" fill="#1e1e2e" stroke="#94e2d5" stroke-width="1.5"/>
+                    <rect x="90" y="42" width="310" height="18" fill="#313244"/>
+                    <text x="100" y="54" fill="#cdd6f4" font-size="8" font-weight="bold">Thunar — /home/guest ( Bulk Rename Ready )</text>
+                    <rect x="98" y="68" width="75" height="110" fill="#181825"/>
+                    <rect x="180" y="68" width="212" height="110" fill="#181825"/>
+                    <!-- Bottom Compact Dock -->
+                    <rect x="175" y="200" width="130" height="24" rx="4" fill="#24253a" stroke="#45475a"/>
+                    <rect x="186" y="204" width="16" height="16" rx="2" fill="#94e2d5"/>
+                    <rect x="210" y="204" width="16" height="16" rx="2" fill="#89b4fa"/>
+                    <rect x="234" y="204" width="16" height="16" rx="2" fill="#a6e3a1"/>
+                    <rect x="258" y="204" width="16" height="16" rx="2" fill="#fab387"/>
+                  </svg>
+                </div>
+              </div>
+
+              <div class="p-5 space-y-3">
+                <div class="flex items-center justify-between">
+                  <h3 class="font-mono-code text-lg font-bold text-term-teal">3. XFCE</h3>
+                  <span class="flag-pill">GTK3 • Modular</span>
+                </div>
+                <p class="text-xs sm:text-sm text-term-main">
+                  <strong>Default Workflow:</strong> Fast, lightweight, and rock-solid. XFCE avoids heavy GPU shader animations and rapid UI redesigns. It comes with the snappy <code>Thunar</code> file manager (which includes a legendary built-in Bulk Renamer) and modular panels.
+                </p>
+                <p class="text-xs sm:text-sm text-term-sub">
+                  <strong>Best For:</strong> Breathing new life into laptops with 4GB RAM or older dual-core CPUs, remote desktop/VM sessions, or developers who want a desktop that stays completely out of the way and never changes their workflow.
+                </p>
+              </div>
+            </div>
+
+            <div class="px-5 pb-5 pt-2 font-mono-code text-xs space-y-1.5 border-t border-[var(--border-dim)] bg-term-mantle/50">
+              <div class="flex justify-between">
+                <span class="text-term-muted">Idle RAM Footprint:</span>
+                <span class="text-term-green">[|||....... 480 MB]</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-term-muted">Low-Spec CPU Efficiency:</span>
+                <span class="text-term-teal">[|||||||||| 10/10]</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 4. CINNAMON -->
+          <div class="term-card rounded-lg overflow-hidden flex flex-col justify-between">
+            <div>
+              <div class="feh-frame border-0 border-b border-[var(--border-dim)] rounded-none">
+                <div class="feh-header">
+                  <span>feh — assets/cinnamon-mint-desktop.svg</span>
+                  <span class="text-term-green">GTK3 • Muffin • Nemo</span>
+                </div>
+                <div class="p-4 bg-[#11111b]">
+                  <svg viewBox="0 0 480 230" class="w-full h-auto rounded border border-[#313244] font-mono-code">
+                    <rect width="480" height="230" fill="#181825"/>
+                    <!-- Nemo File Manager Window -->
+                    <rect x="175" y="20" width="290" height="168" rx="5" fill="#1e1e2e" stroke="#a6e3a1" stroke-width="1.5"/>
+                    <rect x="175" y="20" width="290" height="20" rx="5" fill="#313244"/>
+                    <text x="186" y="33" fill="#cdd6f4" font-size="8.5" font-weight="bold">Nemo — ~/Downloads (Dual Pane + Open in Terminal)</text>
+                    <rect x="184" y="48" width="76" height="130" rx="2" fill="#181825"/>
+                    <rect x="268" y="48" width="188" height="130" rx="2" fill="#181825"/>
+                    <!-- Mint Menu Open -->
+                    <rect x="6" y="64" width="158" height="138" rx="5" fill="#24253a" stroke="#a6e3a1" stroke-width="1.5"/>
+                    <rect x="12" y="72" width="32" height="122" rx="3" fill="#181825"/>
+                    <rect x="50" y="72" width="106" height="18" rx="3" fill="#313244"/>
+                    <text x="56" y="84" fill="#a6e3a1" font-size="8">Accessories</text>
+                    <text x="56" y="102" fill="#cdd6f4" font-size="8">Graphics</text>
+                    <text x="56" y="118" fill="#cdd6f4" font-size="8">Internet</text>
+                    <text x="56" y="134" fill="#cdd6f4" font-size="8">Administration</text>
+                    <!-- Full-Width Bottom Panel -->
+                    <rect x="0" y="206" width="480" height="24" fill="#11111b" stroke="#313244"/>
+                    <rect x="6" y="209" width="46" height="18" rx="3" fill="#a6e3a1"/>
+                    <text x="13" y="221" fill="#11111b" font-size="8.5" font-weight="bold">LM Menu</text>
+                    <rect x="60" y="210" width="16" height="16" rx="2" fill="#313244"/>
+                    <rect x="82" y="210" width="16" height="16" rx="2" fill="#313244"/>
+                    <text x="392" y="221" fill="#cdd6f4" font-size="8">🛡️ 🔊 🌐 14:32</text>
+                  </svg>
+                </div>
+              </div>
+
+              <div class="p-5 space-y-3">
+                <div class="flex items-center justify-between">
+                  <h3 class="font-mono-code text-lg font-bold text-term-green">4. Cinnamon</h3>
+                  <span class="flag-pill">Linux Mint Flagship</span>
+                </div>
+                <p class="text-xs sm:text-sm text-term-main">
+                  <strong>Default Workflow:</strong> Created by the Linux Mint team when GNOME 3 moved away from the traditional desktop metaphor. Cinnamon features a classic single bottom bar, categorized start menu, desktop actions, and <code>Nemo</code>—an extraordinarily practical file manager with built-in "Open as Root" and terminal integration.
+                </p>
+                <p class="text-xs sm:text-sm text-term-sub">
+                  <strong>Note on Wayland:</strong> Cinnamon works rock-solidly on X11 today and includes an experimental Wayland session in recent Mint 22.x releases that is actively maturing toward default status.
+                </p>
+              </div>
+            </div>
+
+            <div class="px-5 pb-5 pt-2 font-mono-code text-xs space-y-1.5 border-t border-[var(--border-dim)] bg-term-mantle/50">
+              <div class="flex justify-between">
+                <span class="text-term-muted">Idle RAM Footprint:</span>
+                <span class="text-term-green">[|||||..... 750 MB]</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-term-muted">Zero-Friction Familiarity:</span>
+                <span class="text-term-green">[|||||||||| 10/10]</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tiling Window Managers Callout (i3, Sway, Hyprland) -->
+        <div class="term-card rounded-lg p-5 sm:p-6 border border-[var(--accent-mauve)]">
+          <div class="font-mono-code text-xs text-term-mauve uppercase">For Keyboard-Centric Power Users</div>
+          <h2 class="font-mono-code text-lg sm:text-xl font-bold text-term-main mt-1">
+            What About Tiling Window Managers (i3, Sway, Hyprland)?
+          </h2>
+          <p class="text-xs sm:text-sm text-term-sub mt-2">
+            If you have seen screenshots on <code>r/unixporn</code> showing terminal windows automatically snapping into a non-overlapping grid with zero titlebars, you were looking at a <strong>Tiling Window Manager</strong>. Instead of dragging windows with a mouse, every window automatically splits the screen (e.g., Master-Stack or Dwindle layout) and is navigated via keyboard shortcuts like <code>Super + 1..9</code> and <code>Super + H/J/K/L</code>.
+          </p>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4 font-mono-code text-xs">
+            <div class="term-subcard p-3.5 rounded">
+              <div class="text-term-blue font-bold">i3wm (X11) &amp; Sway (Wayland)</div>
+              <p class="text-term-sub mt-1 font-sans">
+                Manual tree-based tilers configured via a plain-text config file (<code>~/.config/sway/config</code>). Ultra-lightweight (~250MB RAM), predictable, and built for pure productivity.
+              </p>
+            </div>
+            <div class="term-subcard p-3.5 rounded">
+              <div class="text-term-mauve font-bold">Hyprland (Wayland)</div>
+              <p class="text-term-sub mt-1 font-sans">
+                Dynamic Wayland tiling compositor famous for smooth bezier animations, rounded corners, blur effects, and instant multi-monitor workspace rules.
+              </p>
+            </div>
+            <div class="term-subcard p-3.5 rounded">
+              <div class="text-term-green font-bold">Beginner Advice</div>
+              <p class="text-term-sub mt-1 font-sans">
+                Start with a full Desktop Environment (like KDE or GNOME) first! You can install Sway or Hyprland alongside your main DE and pick it on your login screen (GDM/SDDM) anytime.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ======================================================================
+           PAGE 04: WAYLAND VS XORG DISPLAY SERVER (./04_wayland_vs_xorg.sh)
+           ====================================================================== -->
+      <section id="page-display" class="page-section hidden space-y-8">
+        <!-- Header -->
+        <div class="border-b border-[var(--border-dim)] pb-4">
+          <div class="font-mono-code text-xs text-term-green uppercase tracking-wider">Module 04 // Linux Graphics Stack &amp; Display Protocols</div>
+          <h1 class="font-mono-code text-2xl sm:text-3xl font-bold text-term-main mt-1">Introduction to Wayland and X.Org (X11)</h1>
+          <p class="text-sm sm:text-base text-term-sub mt-2">
+            Whenever you move your mouse, type on your keyboard, or watch a window animate across your monitor, a <strong>Display Server Protocol</strong> coordinates those pixels and inputs. Here is why Linux is completing a once-in-40-years transition from <strong>X.Org (X11)</strong> to <strong>Wayland</strong>.
+          </p>
+        </div>
+
+        <!-- feh Frame: Architectural Diagram of X.Org vs Wayland -->
+        <div class="feh-frame">
+          <div class="feh-header">
+            <span>feh — assets/x11-vs-wayland-pipeline.svg [1120x420]</span>
+            <span class="text-term-green">DRM/KMS • libinput • XWayland</span>
+          </div>
+          <div class="p-4 sm:p-6 bg-term-mantle overflow-x-auto">
+            <svg viewBox="0 0 980 390" class="w-full min-w-[700px] h-auto font-mono-code">
+              <!-- Left Column: X.Org (X11) Legacy Architecture -->
+              <rect x="20" y="15" width="450" height="360" rx="8" fill="#181825" stroke="#fab387" stroke-width="1.5"/>
+              <text x="40" y="42" fill="#fab387" font-size="14" font-weight="bold">LEGACY: X.Org (X11 Architecture — 1984)</text>
+              <text x="40" y="60" fill="#a6adc8" font-size="11">Separate X Server &amp; Compositor = Extra Round-Trips</text>
+
+              <!-- X11 Clients -->
+              <rect x="45" y="78" width="120" height="40" rx="4" fill="#24253a" stroke="#cdd6f4"/>
+              <text x="68" y="102" fill="#cdd6f4" font-size="11">X11 App A</text>
+              <rect x="185" y="78" width="120" height="40" rx="4" fill="#24253a" stroke="#cdd6f4"/>
+              <text x="208" y="102" fill="#cdd6f4" font-size="11">X11 App B</text>
+              <rect x="325" y="78" width="120" height="40" rx="4" fill="#24253a" stroke="#f38ba8"/>
+              <text x="335" y="96" fill="#f38ba8" font-size="10">Global Keylogger</text>
+              <text x="342" y="110" fill="#a6adc8" font-size="9">(Can snoop X11!)</text>
+
+              <!-- X.Org Server Central Bottleneck -->
+              <rect x="55" y="152" width="230" height="62" rx="6" fill="#313244" stroke="#fab387" stroke-width="2"/>
+              <text x="108" y="180" fill="#fab387" font-size="13" font-weight="bold">X.Org Server</text>
+              <text x="80" y="198" fill="#cdd6f4" font-size="10">Middleman for all IPC &amp; input</text>
+
+              <!-- Separate X11 Compositor -->
+              <rect x="320" y="152" width="130" height="62" rx="6" fill="#24253a" stroke="#f9e2af" stroke-width="1.5"/>
+              <text x="342" y="180" fill="#f9e2af" font-size="11" font-weight="bold">Compositor</text>
+              <text x="335" y="198" fill="#a6adc8" font-size="9">(Picom / KWin-X11)</text>
+
+              <!-- Bounce Arrows X Server <-> Compositor -->
+              <line x1="285" y1="175" x2="320" y2="175" stroke="#f9e2af" stroke-width="2"/>
+              <line x1="320" y1="192" x2="285" y2="192" stroke="#fab387" stroke-width="2"/>
+              <text x="290" y="168" fill="#f9e2af" font-size="9">&lt;--&gt;</text>
+
+              <!-- Kernel Layer X11 -->
+              <rect x="55" y="255" width="395" height="96" rx="6" fill="#1e1e2e" stroke="#45475a"/>
+              <text x="75" y="285" fill="#89b4fa" font-size="12" font-weight="bold">Linux Kernel (DRM / KMS + evdev / xf86-input)</text>
+              <text x="75" y="308" fill="#a6adc8" font-size="10">• Treats multi-monitor setups as one giant virtual screen</text>
+              <text x="75" y="326" fill="#a6adc8" font-size="10">• 4-step hop: App -&gt; X Server -&gt; Compositor -&gt; X Server -&gt; Kernel</text>
+
+              <!-- Right Column: Wayland Modern Architecture -->
+              <rect x="510" y="15" width="450" height="360" rx="8" fill="#181825" stroke="#a6e3a1" stroke-width="1.5"/>
+              <text x="530" y="42" fill="#a6e3a1" font-size="14" font-weight="bold">MODERN: Wayland Protocol (Default Today)</text>
+              <text x="530" y="60" fill="#a6adc8" font-size="11">Display Server &amp; Compositor Unified = Direct &amp; Isolated</text>
+
+              <!-- Wayland Clients + XWayland -->
+              <rect x="535" y="78" width="125" height="40" rx="4" fill="#24253a" stroke="#a6e3a1"/>
+              <text x="548" y="102" fill="#cdd6f4" font-size="11">Wayland App A</text>
+              <rect x="675" y="78" width="125" height="40" rx="4" fill="#24253a" stroke="#a6e3a1"/>
+              <text x="688" y="102" fill="#cdd6f4" font-size="11">Wayland App B</text>
+              <rect x="815" y="78" width="125" height="40" rx="4" fill="#24253a" stroke="#89b4fa"/>
+              <text x="840" y="96" fill="#89b4fa" font-size="11" font-weight="bold">XWayland</text>
+              <text x="826" y="110" fill="#a6adc8" font-size="9">(Legacy X11 Apps)</text>
+
+              <!-- Unified Wayland Compositor -->
+              <rect x="535" y="152" width="405" height="62" rx="6" fill="#24253a" stroke="#a6e3a1" stroke-width="2"/>
+              <text x="615" y="180" fill="#a6e3a1" font-size="13" font-weight="bold">Unified Wayland Compositor</text>
+              <text x="580" y="198" fill="#cdd6f4" font-size="10">(KWin / Mutter / Sway / Hyprland / COSMIC-comp)</text>
+
+              <!-- Kernel Layer Wayland -->
+              <rect x="535" y="255" width="405" height="96" rx="6" fill="#1e1e2e" stroke="#a6e3a1"/>
+              <text x="555" y="285" fill="#a6e3a1" font-size="12" font-weight="bold">Linux Kernel (Direct DRM/KMS + libinput)</text>
+              <text x="555" y="308" fill="#cdd6f4" font-size="10">• Direct buffer flips per frame (zero tearing, mixed Hz &amp; DPI)</text>
+              <text x="555" y="326" fill="#cdd6f4" font-size="10">• Strict security: Apps cannot read other windows' keys/pixels</text>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Deep-Dive Explanations: X11, Wayland, XWayland, and NVIDIA Explicit Sync -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="term-card rounded-lg p-5 space-y-2">
+            <div class="font-mono-code text-xs text-term-peach font-bold">WHY REPLACE X11?</div>
+            <h3 class="font-mono-code text-base font-bold text-term-main">The 1984 Design Debt</h3>
+            <p class="text-xs sm:text-sm text-term-sub">
+              X11 was designed at MIT in 1984 so mainframes could draw primitive 2D rectangles over a network to dumb terminals. Because early X11 had no concept of modern GPU compositing, modern desktops had to bolt on an external <strong>Compositor</strong>. Worse, X11 has zero client isolation: any running X11 application can query the global keyboard state (<code>XQueryKeymap</code>) or capture your entire screen silently.
+            </p>
+          </div>
+
+          <div class="term-card rounded-lg p-5 space-y-2">
+            <div class="font-mono-code text-xs text-term-green font-bold">HOW WAYLAND WORKS</div>
+            <h3 class="font-mono-code text-base font-bold text-term-main">Protocol, Not a Single Binary</h3>
+            <p class="text-xs sm:text-sm text-term-sub">
+              Wayland is a lightweight <strong>communication protocol</strong>. Instead of running a separate X Server and Window Manager, your Desktop Environment's compositor (<code>KWin</code> on KDE, <code>Mutter</code> on GNOME, <code>wlroots</code> on Sway) <em>is</em> the display server. Applications render their own window buffers via Vulkan/OpenGL and hand the GPU memory handle (<code>DMA-BUF</code>) directly to the compositor.
+            </p>
+          </div>
+
+          <div class="term-card rounded-lg p-5 space-y-2">
+            <div class="font-mono-code text-xs text-term-blue font-bold">BACKWARD COMPATIBILITY</div>
+            <h3 class="font-mono-code text-base font-bold text-term-main">XWayland &amp; Portals</h3>
+            <p class="text-xs sm:text-sm text-term-sub">
+              What happens if you run an older X11 game or Steam app on Wayland? <strong>XWayland</strong> automatically launches a tiny, rootless X11 server inside your Wayland session so legacy apps run seamlessly. And for legitimate screen recording (like OBS Studio or Discord screen sharing), Wayland uses <strong>XDG Desktop Portals + PipeWire</strong> so you explicitly approve which window or monitor an app can see.
+            </p>
+          </div>
+        </div>
+
+        <!-- Technical Comparison Matrix Table -->
+        <div class="term-card rounded-lg overflow-hidden">
+          <div class="bg-term-mantle px-5 py-3 border-b border-[var(--border-dim)] font-mono-code text-xs sm:text-sm text-term-blue font-bold">
+            $ diff --side-by-side xorg-x11.spec wayland-protocol.spec
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse font-mono-code text-xs sm:text-sm">
+              <thead>
+                <tr class="bg-term-elevated text-term-main border-b border-[var(--border-bright)]">
+                  <th class="p-3.5">Capability / Feature</th>
+                  <th class="p-3.5 text-term-peach">X.Org (X11)</th>
+                  <th class="p-3.5 text-term-green">Wayland</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-[var(--border-dim)] font-sans">
+                <tr>
+                  <td class="p-3.5 font-mono-code font-semibold text-term-main">Multi-Monitor Mixed Refresh Rates<br><span class="text-xs text-term-muted font-normal">(e.g., 60Hz Secondary + 165Hz Gaming Monitor)</span></td>
+                  <td class="p-3.5 text-term-sub">Struggles; compositors often lock to the lowest refresh rate (60Hz) or require disabling compositing.</td>
+                  <td class="p-3.5 text-term-main"><strong class="text-term-green">Native.</strong> Each display has an independent render loop running at its true refresh rate.</td>
+                </tr>
+                <tr>
+                  <td class="p-3.5 font-mono-code font-semibold text-term-main">Multi-Monitor Fractional Scaling<br><span class="text-xs text-term-muted font-normal">(e.g., 150% 4K Laptop + 100% 1080p Monitor)</span></td>
+                  <td class="p-3.5 text-term-sub">Poor; global DPI scaling or blurry <code>xrandr</code> supersampling with high GPU overhead.</td>
+                  <td class="p-3.5 text-term-main"><strong class="text-term-green">Native (`wp-fractional-scale-v1`).</strong> Crisp per-monitor scaling.</td>
+                </tr>
+                <tr>
+                  <td class="p-3.5 font-mono-code font-semibold text-term-main">HDR (High Dynamic Range) &amp; VRR</td>
+                  <td class="p-3.5 text-term-sub">No proper desktop HDR pipeline; VRR only works when a single fullscreen game is active on one monitor.</td>
+                  <td class="p-3.5 text-term-main"><strong class="text-term-green">Supported</strong> in KDE Plasma 6, GNOME, and SteamOS Gamescope with multi-monitor VRR.</td>
+                </tr>
+                <tr>
+                  <td class="p-3.5 font-mono-code font-semibold text-term-main">Security &amp; Window Isolation</td>
+                  <td class="p-3.5 text-term-red">None. Any X11 window can read keystrokes or capture pixels from other X11 windows.</td>
+                  <td class="p-3.5 text-term-main"><strong class="text-term-green">Isolated by design.</strong> Screen capture &amp; global hotkeys require explicit user permission via XDG Portals.</td>
+                </tr>
+                <tr>
+                  <td class="p-3.5 font-mono-code font-semibold text-term-main">NVIDIA Proprietary GPU Support</td>
+                  <td class="p-3.5 text-term-main">Historically mature for decades.</td>
+                  <td class="p-3.5 text-term-main"><strong class="text-term-green">Fully mature since Driver 555+ (2024+).</strong> Explicit Sync (<code>linux-drm-syncobj-v1</code>) eliminated past XWayland flickering.</td>
+                </tr>
+                <tr>
+                  <td class="p-3.5 font-mono-code font-semibold text-term-main">Network Transparency</td>
+                  <td class="p-3.5 text-term-main">Built into protocol (<code>ssh -X</code>).</td>
+                  <td class="p-3.5 text-term-sub">Handled cleanly via external tools like <code>waypipe</code>, PipeWire RDP, or RustDesk.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ======================================================================
+           PAGE 05: DEBIAN, FEDORA, ARCH COMPARISON (./05_debian_fedora_arch.sh)
+           ====================================================================== -->
+      <section id="page-bigthree" class="page-section hidden space-y-8">
+        <!-- Header -->
+        <div class="border-b border-[var(--border-dim)] pb-4">
+          <div class="font-mono-code text-xs text-term-green uppercase tracking-wider">Module 05 // The Upstream Root Distributions</div>
+          <h1 class="font-mono-code text-2xl sm:text-3xl font-bold text-term-main mt-1">Comparison: Debian vs. Fedora vs. Arch Linux</h1>
+          <p class="text-sm sm:text-base text-term-sub mt-2">
+            Although hundreds of Linux distributions exist, roughly 90% of desktop and server distros trace their ancestry back to one of three upstream foundations: <strong>Debian</strong>, <strong>Fedora (Red Hat)</strong>, or <strong>Arch Linux</strong>.
+          </p>
+        </div>
+
+        <!-- feh Frame: Linux Family Tree SVG Diagram -->
+        <div class="feh-frame">
+          <div class="feh-header">
+            <span>feh — assets/linux-upstream-family-tree.svg [1100x340]</span>
+            <span class="text-term-green">Lineage &amp; Derivative Map</span>
+          </div>
+          <div class="p-4 sm:p-6 bg-term-mantle overflow-x-auto">
+            <svg viewBox="0 0 980 310" class="w-full min-w-[700px] h-auto font-mono-code">
+              <!-- Branch 1: DEBIAN -->
+              <rect x="25" y="20" width="290" height="270" rx="8" fill="#181825" stroke="#f38ba8" stroke-width="1.5"/>
+              <rect x="75" y="38" width="190" height="42" rx="6" fill="#24253a" stroke="#f38ba8" stroke-width="2"/>
+              <text x="115" y="58" fill="#f38ba8" font-size="14" font-weight="bold">DEBIAN (1993)</text>
+              <text x="110" y="73" fill="#a6adc8" font-size="9">.deb • dpkg / apt</text>
+              <!-- Connectors -->
+              <line x1="170" y1="80" x2="170" y2="115" stroke="#f38ba8" stroke-width="2"/>
+              <line x1="95" y1="115" x2="245" y2="115" stroke="#f38ba8" stroke-width="2"/>
+              <line x1="95" y1="115" x2="95" y2="135" stroke="#f38ba8" stroke-width="2"/>
+              <line x1="245" y1="115" x2="245" y2="135" stroke="#f38ba8" stroke-width="2"/>
+
+              <rect x="42" y="135" width="110" height="46" rx="4" fill="#1e1e2e" stroke="#45475a"/>
+              <text x="52" y="155" fill="#cdd6f4" font-size="10" font-weight="bold">Direct Debian</text>
+              <text x="50" y="171" fill="#a6adc8" font-size="8.5">LMDE, Kali, RPi OS</text>
+
+              <rect x="175" y="135" width="122" height="46" rx="4" fill="#24253a" stroke="#fab387" stroke-width="1.5"/>
+              <text x="198" y="155" fill="#fab387" font-size="11" font-weight="bold">Ubuntu (2004)</text>
+              <text x="190" y="171" fill="#a6adc8" font-size="8.5">Canonical LTS/Interim</text>
+
+              <line x1="236" y1="181" x2="236" y2="210" stroke="#fab387" stroke-width="2"/>
+              <rect x="155" y="210" width="145" height="62" rx="4" fill="#1e1e2e" stroke="#a6e3a1"/>
+              <text x="166" y="229" fill="#a6e3a1" font-size="10" font-weight="bold">Ubuntu Derivatives:</text>
+              <text x="166" y="245" fill="#cdd6f4" font-size="9">• Linux Mint</text>
+              <text x="166" y="260" fill="#cdd6f4" font-size="9">• Pop!_OS &amp; Zorin OS</text>
+
+              <!-- Branch 2: FEDORA / RED HAT -->
+              <rect x="345" y="20" width="290" height="270" rx="8" fill="#181825" stroke="#89b4fa" stroke-width="1.5"/>
+              <rect x="395" y="38" width="190" height="42" rx="6" fill="#24253a" stroke="#89b4fa" stroke-width="2"/>
+              <text x="430" y="58" fill="#89b4fa" font-size="14" font-weight="bold">FEDORA (2003)</text>
+              <text x="416" y="73" fill="#a6adc8" font-size="9">.rpm • rpm / dnf5 (RHL 1994)</text>
+
+              <line x1="490" y1="80" x2="490" y2="115" stroke="#89b4fa" stroke-width="2"/>
+              <line x1="415" y1="115" x2="565" y2="115" stroke="#89b4fa" stroke-width="2"/>
+              <line x1="415" y1="115" x2="415" y2="135" stroke="#89b4fa" stroke-width="2"/>
+              <line x1="565" y1="115" x2="565" y2="135" stroke="#89b4fa" stroke-width="2"/>
+
+              <rect x="360" y="135" width="115" height="58" rx="4" fill="#1e1e2e" stroke="#45475a"/>
+              <text x="368" y="154" fill="#cdd6f4" font-size="9.5" font-weight="bold">Community Spins</text>
+              <text x="368" y="170" fill="#a6adc8" font-size="8.5">• Nobara</text>
+              <text x="368" y="183" fill="#a6adc8" font-size="8.5">• Bazzite (Atomic)</text>
+
+              <rect x="495" y="135" width="125" height="46" rx="4" fill="#24253a" stroke="#89b4fa"/>
+              <text x="510" y="155" fill="#89b4fa" font-size="10" font-weight="bold">CentOS Stream</text>
+              <text x="510" y="170" fill="#a6adc8" font-size="8.5">Upstream for RHEL</text>
+
+              <line x1="557" y1="181" x2="557" y2="210" stroke="#89b4fa" stroke-width="2"/>
+              <rect x="480" y="210" width="142" height="62" rx="4" fill="#1e1e2e" stroke="#f38ba8"/>
+              <text x="490" y="229" fill="#f38ba8" font-size="10" font-weight="bold">Enterprise (RHEL):</text>
+              <text x="490" y="245" fill="#cdd6f4" font-size="9">• Red Hat Ent. Linux</text>
+              <text x="490" y="260" fill="#cdd6f4" font-size="9">• AlmaLinux &amp; Rocky</text>
+
+              <!-- Branch 3: ARCH LINUX -->
+              <rect x="665" y="20" width="290" height="270" rx="8" fill="#181825" stroke="#94e2d5" stroke-width="1.5"/>
+              <rect x="715" y="38" width="190" height="42" rx="6" fill="#24253a" stroke="#94e2d5" stroke-width="2"/>
+              <text x="738" y="58" fill="#94e2d5" font-size="14" font-weight="bold">ARCH LINUX (2002)</text>
+              <text x="735" y="73" fill="#a6adc8" font-size="9">.pkg.tar.zst • pacman + AUR</text>
+
+              <line x1="810" y1="80" x2="810" y2="135" stroke="#94e2d5" stroke-width="2"/>
+              <rect x="690" y="135" width="240" height="135" rx="6" fill="#1e1e2e" stroke="#94e2d5"/>
+              <text x="710" y="160" fill="#94e2d5" font-size="11" font-weight="bold">Arch-Based Derivatives:</text>
+              <text x="710" y="182" fill="#cdd6f4" font-size="10">• <tspan font-weight="bold">EndeavourOS</tspan> (Close to vanilla Arch + GUI)</text>
+              <text x="710" y="204" fill="#cdd6f4" font-size="10">• <tspan font-weight="bold">CachyOS</tspan> (x86-64-v3/v4 optimized)</text>
+              <text x="710" y="226" fill="#cdd6f4" font-size="10">• <tspan font-weight="bold">SteamOS 3.x</tspan> (Valve Steam Deck OS)</text>
+              <text x="710" y="248" fill="#cdd6f4" font-size="10">• <tspan font-weight="bold">Manjaro</tspan> (Separate delayed repos)</text>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Deep-Dive Cards: Debian, Fedora, Arch -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+          <!-- Debian -->
+          <div class="term-card rounded-lg p-5 flex flex-col justify-between border-t-4 border-t-[#f38ba8]">
+            <div class="space-y-3">
+              <div class="flex justify-between items-center">
+                <h2 class="font-mono-code text-xl font-bold text-term-red">Debian</h2>
+                <span class="flag-pill">"The Universal OS"</span>
+              </div>
+              <p class="text-xs sm:text-sm text-term-main">
+                Founded by Ian Murdock in 1993, Debian is 100% community-governed (no corporate owner) and strictly adheres to the <strong>Debian Free Software Guidelines (DFSG)</strong>. Since Debian 12 ("Bookworm"), official installer ISOs include non-free hardware firmware by default so Wi-Fi cards work out of the box.
+              </p>
+              <div class="term-subcard p-3 rounded font-mono-code text-xs space-y-1">
+                <div class="text-term-red font-bold">The 3 Debian Branches:</div>
+                <div>• <strong>Stable:</strong> Released every ~2 years. Packages are frozen; only security &amp; critical bug fixes backported.</div>
+                <div>• <strong>Testing:</strong> Staging ground for the next Stable release.</div>
+                <div>• <strong>Unstable ("Sid"):</strong> Rolling development branch where new packages land first.</div>
+              </div>
+            </div>
+            <div class="mt-4 pt-3 border-t border-[var(--border-dim)] font-mono-code text-xs text-term-sub">
+              <strong>Ideal For:</strong> Production servers, home labs, and desktop users who want an OS that never changes its behavior for years.
+            </div>
+          </div>
+
+          <!-- Fedora -->
+          <div class="term-card rounded-lg p-5 flex flex-col justify-between border-t-4 border-t-[#89b4fa]">
+            <div class="space-y-3">
+              <div class="flex justify-between items-center">
+                <h2 class="font-mono-code text-xl font-bold text-term-blue">Fedora Linux</h2>
+                <span class="flag-pill">"The Innovator"</span>
+              </div>
+              <p class="text-xs sm:text-sm text-term-main">
+                Sponsored by Red Hat and governed by the Fedora Project Council, Fedora serves as the upstream innovation ground for <strong>Red Hat Enterprise Linux (RHEL)</strong>. It follows four foundations: <em>Freedom, Friends, Features, First</em>.
+              </p>
+              <div class="term-subcard p-3 rounded font-mono-code text-xs space-y-1">
+                <div class="text-term-blue font-bold">Why Developers Love It:</div>
+                <div>• <strong>Semi-Rolling Feel:</strong> Point releases every 6 months, plus continuous Linux kernel updates (e.g., 6.11 &rarr; 6.12 &rarr; 6.13) within the same release.</div>
+                <div>• <strong>Modern Plumbing:</strong> Ships with Btrfs filesystem, zram swap, SELinux mandatory access control, PipeWire, and fast <code>dnf5</code>.</div>
+              </div>
+            </div>
+            <div class="mt-4 pt-3 border-t border-[var(--border-dim)] font-mono-code text-xs text-term-sub">
+              <strong>Ideal For:</strong> Workstation users, laptop owners, gamers, and software engineers who want modern packages without manual system assembly.
+            </div>
+          </div>
+
+          <!-- Arch Linux -->
+          <div class="term-card rounded-lg p-5 flex flex-col justify-between border-t-4 border-t-[#94e2d5]">
+            <div class="space-y-3">
+              <div class="flex justify-between items-center">
+                <h2 class="font-mono-code text-xl font-bold text-term-teal">Arch Linux</h2>
+                <span class="flag-pill">"DIY Rolling Release"</span>
+              </div>
+              <p class="text-xs sm:text-sm text-term-main">
+                Created by Judd Vinet in 2002, Arch is an independent <strong>Rolling Release</strong> distribution: you install it once and run <code>sudo pacman -Syu</code> to stay continuously on the latest stable upstream software forever.
+              </p>
+              <div class="term-subcard p-3 rounded font-mono-code text-xs space-y-1">
+                <div class="text-term-teal font-bold">Core Pillars of Arch:</div>
+                <div>• <strong>Minimal Base (plus `archinstall`):</strong> Boots to a CLI ISO where you pick your exact partitioning, bootloader, audio server, and DE (or use the guided <code>archinstall</code> TUI script).</div>
+                <div>• <strong>The AUR (Arch User Repository):</strong> Community repository of <code>PKGBUILD</code> scripts allowing you to build virtually any Linux software in existence.</div>
+                <div>• <strong>The Arch Wiki:</strong> The most comprehensive documentation resource in all of Linux.</div>
+              </div>
+            </div>
+            <div class="mt-4 pt-3 border-t border-[var(--border-dim)] font-mono-code text-xs text-term-sub">
+              <strong>Ideal For:</strong> Enthusiasts and tinkerers who want to understand every service running on their machine and always have bleeding-edge software.
+            </div>
+          </div>
+        </div>
+
+        <!-- Package Manager Rosetta Stone Table -->
+        <div class="term-card rounded-lg overflow-hidden">
+          <div class="bg-term-mantle px-5 py-3 border-b border-[var(--border-dim)] font-mono-code text-xs sm:text-sm text-term-green font-bold">
+            $ cat /usr/share/doc/package-manager-rosetta.md
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse font-mono-code text-xs sm:text-sm">
+              <thead>
+                <tr class="bg-term-elevated text-term-main border-b border-[var(--border-bright)]">
+                  <th class="p-3.5">Task / Action</th>
+                  <th class="p-3.5 text-term-red">Debian / Ubuntu / Mint (APT)</th>
+                  <th class="p-3.5 text-term-blue">Fedora (DNF5)</th>
+                  <th class="p-3.5 text-term-teal">Arch Linux (Pacman)</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-[var(--border-dim)]">
+                <tr>
+                  <td class="p-3.5 text-term-sub font-sans font-medium">Update repos &amp; upgrade system</td>
+                  <td class="p-3.5 text-term-main"><code>sudo apt update &amp;&amp; sudo apt upgrade</code></td>
+                  <td class="p-3.5 text-term-main"><code>sudo dnf upgrade</code></td>
+                  <td class="p-3.5 text-term-main"><code>sudo pacman -Syu</code></td>
+                </tr>
+                <tr>
+                  <td class="p-3.5 text-term-sub font-sans font-medium">Install a package</td>
+                  <td class="p-3.5 text-term-main"><code>sudo apt install neovim</code></td>
+                  <td class="p-3.5 text-term-main"><code>sudo dnf install neovim</code></td>
+                  <td class="p-3.5 text-term-main"><code>sudo pacman -S neovim</code></td>
+                </tr>
+                <tr>
+                  <td class="p-3.5 text-term-sub font-sans font-medium">Remove package + unused deps</td>
+                  <td class="p-3.5 text-term-main"><code>sudo apt purge pkg &amp;&amp; sudo apt autoremove</code></td>
+                  <td class="p-3.5 text-term-main"><code>sudo dnf remove pkg</code></td>
+                  <td class="p-3.5 text-term-main"><code>sudo pacman -Rns pkg</code></td>
+                </tr>
+                <tr>
+                  <td class="p-3.5 text-term-sub font-sans font-medium">Search repositories</td>
+                  <td class="p-3.5 text-term-main"><code>apt search keyword</code></td>
+                  <td class="p-3.5 text-term-main"><code>dnf search keyword</code></td>
+                  <td class="p-3.5 text-term-main"><code>pacman -Ss keyword</code></td>
+                </tr>
+                <tr>
+                  <td class="p-3.5 text-term-sub font-sans font-medium">Default Security Module</td>
+                  <td class="p-3.5 text-term-sub">AppArmor</td>
+                  <td class="p-3.5 text-term-sub">SELinux (Enforcing)</td>
+                  <td class="p-3.5 text-term-sub">User-configured (Landlock / AppArmor optional)</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ======================================================================
+           PAGE 06: GENTOO & VOID LINUX + BEGINNER VERDICT (./06_gentoo_and_void.sh)
+           ====================================================================== -->
+      <section id="page-advanced" class="page-section hidden space-y-8">
+        <!-- Warning Banner -->
+        <div class="bg-term-surface border-2 border-[var(--accent-peach)] rounded-lg p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div class="font-mono-code">
+            <div class="text-xs text-term-peach font-bold tracking-wider">[ ! WARN: ADVANCED_USERLAND // MANUAL SYSTEM ARCHITECTURE ]</div>
+            <h1 class="text-xl sm:text-2xl font-bold text-term-main mt-1">Gentoo Linux &amp; Void Linux: Should a Beginner Use Them?</h1>
+          </div>
+          <span class="font-mono-code text-xs px-3 py-1.5 rounded bg-term-mantle text-term-peach border border-[var(--accent-peach)] shrink-0">
+            Difficulty: Enthusiast / SysAdmin
+          </span>
+        </div>
+
+        <!-- Deep Dive Grid: Gentoo vs Void -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+          <!-- GENTOO LINUX -->
+          <div class="term-card rounded-lg p-5 sm:p-6 space-y-4">
+            <div class="flex items-center justify-between border-b border-[var(--border-dim)] pb-3">
+              <div>
+                <h2 class="font-mono-code text-xl font-bold text-term-mauve">Gentoo Linux</h2>
+                <span class="font-mono-code text-xs text-term-muted">Founded 2000 (Daniel Robbins) • Package Manager: Portage (emerge)</span>
+              </div>
+              <span class="flag-pill">Source-Based Meta-Distro</span>
+            </div>
+
+            <p class="text-xs sm:text-sm text-term-main">
+              In binary distributions (like Ubuntu, Fedora, or Arch), maintainers compile source code on their servers so everyone downloads the exact same pre-built binary package. <strong>Gentoo Linux</strong> is a <em>source-based distribution</em>: by default, its package manager (<strong>Portage</strong>, invoked via <code>emerge</code>) downloads raw source code tariffs and compiles them locally on your CPU using your exact compiler optimizations (<code>CFLAGS="-march=native -O2"</code>).
+            </p>
+
+            <div class="term-subcard p-4 rounded space-y-2 text-xs sm:text-sm">
+              <div class="font-mono-code text-term-mauve font-bold">Key Gentoo Technologies (Accurate Modern Facts):</div>
+              <ul class="space-y-1.5 text-term-sub list-disc pl-4">
+                <li>
+                  <strong>USE Flags (<code>/etc/portage/make.conf</code>):</strong> Declarative keywords that tell Portage which optional features to compile into or strip out of software across your entire system. Don't own a printer or Bluetooth adapter? Set <code>USE="-cups -bluetooth"</code> and no program on your PC will ever compile code or pull dependencies for printing or Bluetooth.
+                </li>
+                <li>
+                  <strong>Init Freedom:</strong> Gentoo officially supports both <strong>OpenRC</strong> (its traditional dependency-based init system) and <strong>systemd</strong> via official Stage 3 tarballs.
+                </li>
+                <li>
+                  <strong>Official Binary Packages (`binhost` since late 2023):</strong> You no longer <em>have</em> to spend 4 hours compiling web browsers! Gentoo now hosts official GPG-signed binary packages (`emerge --getbinpkg` / `-g`) so users can install pre-compiled binaries for huge packages like Firefox, Chromium, Rust, or LLVM while compiling everything else from source.
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- VOID LINUX -->
+          <div class="term-card rounded-lg p-5 sm:p-6 space-y-4">
+            <div class="flex items-center justify-between border-b border-[var(--border-dim)] pb-3">
+              <div>
+                <h2 class="font-mono-code text-xl font-bold text-term-green">Void Linux</h2>
+                <span class="font-mono-code text-xs text-term-muted">Founded 2008 (Juan Romero Pardines) • Pkg: XBPS • Init: runit</span>
+              </div>
+              <span class="flag-pill">Independent Rolling</span>
+            </div>
+
+            <p class="text-xs sm:text-sm text-term-main">
+              <strong>Void Linux</strong> is a completely independent, general-purpose rolling-release distribution created from scratch by a former NetBSD developer. Unlike Ubuntu or Manjaro, Void is <strong>not</strong> a fork of Debian, Fedora, or Arch. It prioritizes BSD-like simplicity, speed, and clean engineering.
+            </p>
+
+            <div class="term-subcard p-4 rounded space-y-2 text-xs sm:text-sm">
+              <div class="font-mono-code text-term-green font-bold">Key Void Linux Technologies (Accurate Modern Facts):</div>
+              <ul class="space-y-1.5 text-term-sub list-disc pl-4">
+                <li>
+                  <strong><code>runit</code> Init System:</strong> Instead of the monolithic <code>systemd</code> suite, Void uses <strong>runit</strong>—a tiny, lightning-fast UNIX init scheme with automatic process supervision. Enabling a background service on Void is literally just creating a symlink: <code>ln -s /etc/sv/NetworkManager /var/service/</code>.
+                </li>
+                <li>
+                  <strong>XBPS (X Binary Package System):</strong> Written from scratch in C, <code>xbps-install -Su</code> is among the fastest binary package managers in existence, paired with <code>xbps-src</code> for building packages in clean chroots.
+                </li>
+                <li>
+                  <strong>First-Class <code>glibc</code> and <code>musl</code> Editions:</strong> Users can download official ISOs compiled against either standard GNU C Library (<code>glibc</code>) or the lightweight, standards-strict <code>musl</code> libc. <em>(Historical accuracy note: Void transitioned back from LibreSSL to OpenSSL in March 2021 for upstream compatibility.)</em>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- INTERACTIVE FEATURE: Gentoo USE Flag & Portage Simulator -->
+        <div class="term-card rounded-lg p-5 sm:p-6 border border-[var(--accent-mauve)]">
+          <div class="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--border-dim)] pb-3 mb-4">
+            <div class="font-mono-code">
+              <span class="text-term-mauve font-bold">$ nano /etc/portage/make.conf &amp;&amp; emerge -pv media-video/mpv</span>
+              <p class="text-xs text-term-sub mt-0.5">Interactive Gentoo USE Flag Simulator: Toggle flags below to see how Gentoo customizes dependencies and build times.</p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-center font-mono-code text-xs sm:text-sm">
+            <!-- Flag Toggles -->
+            <div class="lg:col-span-6 space-y-2">
+              <div class="text-term-sub text-xs mb-2">Click flags to enable (<span class="text-term-green">+flag</span>) or strip out (<span class="text-term-red">-flag</span>):</div>
+              <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                <button onclick="toggleUseFlag('wayland')" id="use-btn-wayland" class="p-2 rounded border border-[var(--accent-green)] bg-term-mantle text-term-green text-left">+wayland</button>
+                <button onclick="toggleUseFlag('pipewire')" id="use-btn-pipewire" class="p-2 rounded border border-[var(--accent-green)] bg-term-mantle text-term-green text-left">+pipewire</button>
+                <button onclick="toggleUseFlag('vulkan')" id="use-btn-vulkan" class="p-2 rounded border border-[var(--accent-green)] bg-term-mantle text-term-green text-left">+vulkan</button>
+                <button onclick="toggleUseFlag('X')" id="use-btn-X" class="p-2 rounded border border-[var(--border-dim)] bg-term-mantle text-term-red text-left">-X</button>
+                <button onclick="toggleUseFlag('bluetooth')" id="use-btn-bluetooth" class="p-2 rounded border border-[var(--border-dim)] bg-term-mantle text-term-red text-left">-bluetooth</button>
+                <button onclick="toggleUseFlag('samba')" id="use-btn-samba" class="p-2 rounded border border-[var(--border-dim)] bg-term-mantle text-term-red text-left">-samba</button>
+              </div>
+              <div class="bg-term-mantle p-3 rounded border border-[var(--border-dim)] mt-3 text-xs">
+                <div class="text-term-muted"># /etc/portage/make.conf preview:</div>
+                <div class="text-term-main mt-1">COMMON_FLAGS="-march=native -O2 -pipe"</div>
+                <div id="make-conf-use-line" class="text-term-mauve mt-0.5 break-words">USE="wayland pipewire vulkan -X -bluetooth -samba"</div>
+              </div>
+            </div>
+
+            <!-- Simulated emerge --pretend --verbose output -->
+            <div class="lg:col-span-6 bg-term-mantle border border-[var(--border-bright)] rounded p-4 space-y-2 text-xs">
+              <div class="text-term-green">These are the packages that would be merged, in order:</div>
+              <div id="emerge-output-line" class="text-term-main break-words leading-relaxed">
+                [ebuild   R    ] <span class="text-term-blue font-bold">media-video/mpv-0.39.0</span>::gentoo  USE="<span class="text-term-red">wayland</span> <span class="text-term-red">pipewire</span> <span class="text-term-red">vulkan</span> <span class="text-term-blue">-X</span> <span class="text-term-blue">-bluetooth</span> <span class="text-term-blue">-samba</span>"
+              </div>
+              <div class="border-t border-[var(--border-dim)] pt-2 grid grid-cols-3 gap-2 text-center">
+                <div class="bg-term-surface p-2 rounded">
+                  <div class="text-term-muted text-[10px]">Pulled Deps</div>
+                  <div id="emerge-deps" class="text-term-yellow font-bold text-sm">18 pkgs</div>
+                </div>
+                <div class="bg-term-surface p-2 rounded">
+                  <div class="text-term-muted text-[10px]">Binary Footprint</div>
+                  <div id="emerge-size" class="text-term-teal font-bold text-sm">14.2 MiB</div>
+                </div>
+                <div class="bg-term-surface p-2 rounded">
+                  <div class="text-term-muted text-[10px]">Est. Compile Time</div>
+                  <div id="emerge-time" class="text-term-peach font-bold text-sm">~1m 45s</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- THE HONEST BEGINNER VERDICT & PROGRESSION TIMELINE -->
+        <div class="term-card rounded-lg p-5 sm:p-7 space-y-5 border-l-4 border-l-[var(--accent-green)]">
+          <div>
+            <div class="font-mono-code text-xs text-term-green font-bold uppercase">The Honest Engineering Verdict</div>
+            <h2 class="font-mono-code text-xl sm:text-2xl font-bold text-term-main mt-1">
+              Should a Beginner Use Gentoo or Void Linux as Their First OS?
+            </h2>
+          </div>
+
+          <div class="bg-term-mantle border border-[var(--border-bright)] rounded-lg p-4 text-sm sm:text-base text-term-main">
+            <strong class="text-term-red font-mono-code">Short Answer: No—not on bare metal as your first Linux installation.</strong>
+            <p class="text-xs sm:text-sm text-term-sub mt-2">
+              There is a vocal internet subculture that tells newcomers to "jump straight into Gentoo or Arch to learn the hard way." In reality, trying to use Gentoo or Void on your primary computer before you know how Linux filesystems, permissions, init services, and package managers work usually leads to frustration—like booting into a black TTY screen with no Wi-Fi because you didn't install <code>wpa_supplicant</code> or symlink <code>dbus</code>.
+            </p>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs sm:text-sm">
+            <div class="term-subcard p-4 rounded">
+              <div class="font-mono-code text-term-peach font-bold mb-1">Why Gentoo Is Hard on Day 1:</div>
+              <p class="text-term-sub">
+                Gentoo has no graphical installer. Following the Gentoo Handbook requires partitioning your NVMe drive in the CLI with <code>fdisk</code>, formatting filesystems, extracting a <code>stage3</code> tarball, mounting <code>/proc</code> and <code>/sys</code>, chrooting, writing <code>/etc/fstab</code>, configuring and compiling a Linux kernel (or using <code>gentoo-kernel-bin</code>), and configuring GRUB—all before you even have a graphical desktop.
+              </p>
+            </div>
+            <div class="term-subcard p-4 rounded">
+              <div class="font-mono-code text-term-blue font-bold mb-1">Why Void Is Better Saved for Month 2+:</div>
+              <p class="text-term-sub">
+                Void actually includes a straightforward TUI installer (`void-installer`) and installs in 5 minutes! However, because it uses <code>runit</code> instead of <code>systemd</code>, 90% of beginner copy-paste tutorials online (which assume <code>sudo systemctl enable --now ...</code>) will not work verbatim, and audio (PipeWire/WirePlumber) or Polkit session setup requires reading the Void Handbook carefully.
+              </p>
+            </div>
+          </div>
+
+          <!-- 4-Stage Road to Mastery Progression -->
+          <div class="pt-2">
+            <h3 class="font-mono-code text-sm font-bold text-term-green mb-3">
+              $ cat ~/road-to-linux-mastery.plan
+            </h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 font-mono-code text-xs">
+              <div class="term-subcard p-3.5 rounded border-t-2 border-t-[var(--accent-green)]">
+                <div class="text-term-green font-bold">STAGE 01 (Weeks 1–3)</div>
+                <div class="text-term-main font-semibold mt-1">Daily Driver Stability</div>
+                <p class="text-term-sub font-sans mt-1">
+                  Install <strong>Linux Mint</strong> or <strong>Fedora</strong> on your PC. Get your browser, Steam games, and workflow running comfortably.
+                </p>
+              </div>
+              <div class="term-subcard p-3.5 rounded border-t-2 border-t-[var(--accent-blue)]">
+                <div class="text-term-blue font-bold">STAGE 02 (Month 1–2)</div>
+                <div class="text-term-main font-semibold mt-1">Master the Terminal</div>
+                <p class="text-term-sub font-sans mt-1">
+                  Use the terminal for software updates, editing config files in <code>~/.config</code>, writing small Bash scripts, and understanding <code>/etc/fstab</code>.
+                </p>
+              </div>
+              <div class="term-subcard p-3.5 rounded border-t-2 border-t-[var(--accent-mauve)]">
+                <div class="text-term-mauve font-bold">STAGE 03 (Month 3)</div>
+                <div class="text-term-main font-semibold mt-1">Virtual Machine Lab</div>
+                <p class="text-term-sub font-sans mt-1">
+                  Install <strong>QEMU/KVM (`virt-manager`)</strong> or VirtualBox. Do a manual CLI install of Arch, Void, or Gentoo inside a safe VM window alongside the Handbook!
+                </p>
+              </div>
+              <div class="term-subcard p-3.5 rounded border-t-2 border-t-[var(--accent-peach)]">
+                <div class="text-term-peach font-bold">STAGE 04 (When Ready)</div>
+                <div class="text-term-main font-semibold mt-1">Bare-Metal Control</div>
+                <p class="text-term-sub font-sans mt-1">
+                  Once you can partition, chroot, and fix bootloaders from memory in a VM, install Arch, Void, or Gentoo on real hardware with total confidence.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- 5. BOTTOM TMUX STATUS BAR & INTERACTIVE COMMAND LINE -->
+    <footer class="bg-term-mantle border-t border-[var(--border-dim)] font-mono-code text-xs select-none sticky bottom-0 z-40">
+      <!-- Interactive Command Bar Output Toast (Hidden unless used) -->
+      <div id="tmux-cmd-toast" class="hidden bg-term-elevated border-b border-[var(--border-bright)] px-4 py-2 text-xs text-term-main flex items-center justify-between">
+        <span id="tmux-cmd-toast-text"></span>
+        <button onclick="document.getElementById('tmux-cmd-toast').classList.add('hidden')" class="text-term-muted hover:text-term-main ml-4">[x]</button>
+      </div>
+
+      <div class="flex flex-wrap items-center justify-between px-2 py-1.5 gap-2">
+        <!-- Left tmux pill -->
+        <div class="flex items-center gap-2">
+          <span class="bg-[var(--accent-green)] text-[#11111b] font-bold px-2 py-0.5 rounded-sm">[0:bash*]</span>
+          <span id="tmux-active-script" class="text-term-blue font-semibold">00_welcome.sh</span>
+          <span class="text-term-muted hidden sm:inline">|</span>
+          <button onclick="stepPage(-1)" class="px-2 py-0.5 bg-term-surface hover:bg-term-elevated text-term-sub rounded border border-[var(--border-dim)]" title="Previous Section">&larr; Prev</button>
+          <button onclick="stepPage(1)" class="px-2 py-0.5 bg-term-surface hover:bg-term-elevated text-term-sub rounded border border-[var(--border-dim)]" title="Next Section">Next &rarr;</button>
+        </div>
+
+        <!-- Center Interactive tmux Command Prompt -->
+        <form onsubmit="handleTmuxCommand(event)" class="flex-1 max-w-md flex items-center bg-term-base border border-[var(--border-dim)] rounded px-2.5 py-0.5">
+          <span class="text-term-green mr-1.5">:</span>
+          <input id="tmux-cmd-input" type="text" placeholder="Type command (goto 1..6, help, ls, uname -a)..." autocomplete="off" class="w-full bg-transparent text-term-main focus:outline-none text-xs">
+        </form>
+
+        <!-- Right Status Metadata -->
+        <div class="hidden md:flex items-center gap-3 text-term-sub">
+          <span>UTF-8</span>
+          <span>linux-6.12-lts</span>
+          <span id="tmux-page-indicator" class="bg-term-elevated text-term-green px-2 py-0.5 rounded-sm">Page 0/6</span>
+        </div>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- ==========================================================================
+       APPLICATION LOGIC & INTERACTIVE MODULES
+       ========================================================================== -->
+  <script>
+    /* --------------------------------------------------------------------------
+       1. NAVIGATION & TERMINAL COMMAND TRANSITION ENGINE
+       -------------------------------------------------------------------------- */
+    const PAGES = [
+      { id: 'welcome', num: 0, file: './00_welcome.sh', args: '--fastfetch', cwd: '~/00_welcome' },
+      { id: 'distro', num: 1, file: './01_distro_choice.sh', args: '--analyze-layers', cwd: '~/01_distro_choice' },
+      { id: 'commands', num: 2, file: './02_basic_commands.sh', args: '--interactive-shell', cwd: '~/02_basic_commands' },
+      { id: 'de', num: 3, file: './03_desktop_envs.sh', args: '--render-mockups', cwd: '~/03_desktop_envs' },
+      { id: 'display', num: 4, file: './04_wayland_vs_xorg.sh', args: '--compare-protocols', cwd: '~/04_wayland_vs_xorg' },
+      { id: 'bigthree', num: 5, file: './05_debian_fedora_arch.sh', args: '--tree', cwd: '~/05_debian_fedora_arch' },
+      { id: 'advanced', num: 6, file: './06_gentoo_and_void.sh', args: '--audit-beginner', cwd: '~/06_gentoo_and_void' }
+    ];
+
+    let currentPageIndex = 0;
+    let typingTimer = null;
+
+    function navigateTo(pageId) {
+      const targetIndex = PAGES.findIndex(p => p.id === pageId);
+      if (targetIndex === -1) return;
+      currentPageIndex = targetIndex;
+      const pageMeta = PAGES[targetIndex];
+
+      // Update active nav tab
+      document.querySelectorAll('.nav-tab').forEach(btn => btn.classList.remove('active'));
+      const activeTab = document.getElementById('tab-' + pageMeta.id);
+      if (activeTab) activeTab.classList.add('active');
+
+      // Update header CWD & footer tmux status
+      document.getElementById('header-cwd').textContent = pageMeta.cwd;
+      document.getElementById('tmux-active-script').textContent = pageMeta.file.replace('./', '');
+      document.getElementById('tmux-page-indicator').textContent = `Page ${pageMeta.num}/6`;
+
+      // Animate typewriter command execution header
+      const cmdString = `${pageMeta.file} ${pageMeta.args}`;
+      const cmdEl = document.getElementById('exec-command-text');
+      if (typingTimer) clearInterval(typingTimer);
+      cmdEl.textContent = '';
+      let charIdx = 0;
+      typingTimer = setInterval(() => {
+        cmdEl.textContent += cmdString.charAt(charIdx);
+        charIdx++;
+        if (charIdx >= cmdString.length) {
+          clearInterval(typingTimer);
+        }
+      }, 14);
+
+      // Switch visible section with smooth print animation
+      document.querySelectorAll('.page-section').forEach(sec => {
+        sec.classList.add('hidden');
+        sec.classList.remove('animate-print');
+      });
+      const targetSec = document.getElementById('page-' + pageMeta.id);
+      if (targetSec) {
+        targetSec.classList.remove('hidden');
+        void targetSec.offsetWidth; // trigger reflow for animation
+        targetSec.classList.add('animate-print');
+      }
+
+      // Scroll to top of window smoothly
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function stepPage(delta) {
+      const nextIdx = (currentPageIndex + delta + PAGES.length) % PAGES.length;
+      navigateTo(PAGES[nextIdx].id);
+    }
+
+    /* --------------------------------------------------------------------------
+       2. THEME SWITCHER & CRT SCANLINE TOGGLE
+       -------------------------------------------------------------------------- */
+    function setTheme(themeName) {
+      document.documentElement.setAttribute('data-theme', themeName);
+      document.getElementById('theme-select').value = themeName;
+    }
+
+    function toggleCRT() {
+      const body = document.body;
+      const btn = document.getElementById('crt-toggle-btn');
+      body.classList.toggle('crt-enabled');
+      const isOn = body.classList.contains('crt-enabled');
+      btn.textContent = isOn ? '[CRT: ON]' : '[CRT: OFF]';
+    }
+
+    /* --------------------------------------------------------------------------
+       3. PAGE 01: INTERACTIVE DISTRO PICKER QUESTIONNAIRE
+       -------------------------------------------------------------------------- */
+    function runDistroQuiz() {
+      const hw = document.getElementById('quiz-hw').value;
+      const gpu = document.getElementById('quiz-gpu').value;
+      const use = document.getElementById('quiz-use').value;
+      const ui = document.getElementById('quiz-ui').value;
+
+      let primary = '';
+      let runnerUp = '';
+      let reason = '';
+      let installCmd = '';
+
+      if (hw === 'older') {
+        primary = 'Linux Mint XFCE Edition (or Debian 12 with XFCE)';
+        runnerUp = 'Zorin OS Lite / Lubuntu';
+        reason = 'Your machine has older specs or 4GB RAM. Linux Mint XFCE uses ~480MB RAM at idle while keeping Mint’s rock-solid Update Manager, Driver Manager, and Flatpak store.';
+        installCmd = 'ISO Recommendation: linuxmint-22.1-xfce-64bit.iso';
+      } else if (hw === 'bleeding') {
+        if (ui === 'modern') {
+          primary = 'Fedora Workstation (GNOME)';
+        } else {
+          primary = 'Fedora KDE Plasma Desktop';
+        }
+        runnerUp = 'Pop!_OS 22.04 LTS (ships updated HWE kernel)';
+        reason = 'Because your hardware was released in the last 6 months, you benefit heavily from Fedora’s current 6.12+ Linux kernel, recent Mesa graphics stack, and mature Wayland support.';
+        installCmd = 'Post-install tip: Enable RPM Fusion in Software Center for codecs/NVIDIA.';
+      } else if (gpu === 'nvidia' && (use === 'gaming' || use === 'dev')) {
+        primary = 'Pop!_OS (NVIDIA ISO) or Linux Mint Cinnamon';
+        runnerUp = 'Fedora KDE Plasma Desktop / Nobara';
+        reason = 'Pop!_OS provides a dedicated ISO with proprietary NVIDIA drivers pre-baked into the live USB installer, while Linux Mint’s Driver Manager lets you install the recommended NVIDIA driver + CUDA libraries in two clicks.';
+        installCmd = 'Verify driver after install: nvidia-smi';
+      } else if (ui === 'modern') {
+        primary = 'Fedora Workstation (GNOME) or Zorin OS Core';
+        runnerUp = 'Ubuntu 24.04 LTS';
+        reason = 'You prefer a clean, workspace-centric or modern aesthetic. Fedora Workstation delivers pure upstream GNOME with smooth touchpad gestures, while Zorin OS gives you a super-polished switcher layout.';
+        installCmd = 'Press Super (Windows key) to open the GNOME Activities Overview.';
+      } else if (ui === 'custom') {
+        primary = 'Fedora KDE Plasma Desktop (or Kubuntu LTS)';
+        runnerUp = 'Linux Mint Cinnamon';
+        reason = 'KDE Plasma 6 gives you unmatched visual customization, widgets, fractional scaling, and the feature-packed Dolphin file manager without sacrificing low memory usage.';
+        installCmd = 'Try KRunner anytime with Alt + Space!';
+      } else {
+        primary = 'Linux Mint (Cinnamon Edition)';
+        runnerUp = 'Zorin OS Core / Ubuntu LTS';
+        reason = 'For general everyday reliability and a familiar Windows-style taskbar, Linux Mint Cinnamon is the gold standard: zero forced Snaps, pre-configured Flatpaks, Timeshift backups, and effortless maintenance.';
+        installCmd = 'ISO Recommendation: linuxmint-22.1-cinnamon-64bit.iso';
+      }
+
+      const outBox = document.getElementById('quiz-output-box');
+      outBox.innerHTML = `
+        <div class="text-term-muted"># Output from ./distro-picker.sh --evaluate:</div>
+        <div class="text-sm sm:text-base font-bold text-term-green">★ PRIMARY RECOMMENDATION: ${primary}</div>
+        <div class="text-xs text-term-blue">Runner-Up Alternative: ${runnerUp}</div>
+        <p class="text-xs sm:text-sm text-term-main font-sans pt-1">${reason}</p>
+        <div class="text-xs text-term-peach pt-1">&gt; ${installCmd}</div>
+      `;
+    }
+
+    function resetDistroQuiz() {
+      document.getElementById('quiz-hw').value = 'modern';
+      document.getElementById('quiz-gpu').value = 'amd_intel';
+      document.getElementById('quiz-use').value = 'general';
+      document.getElementById('quiz-ui').value = 'windows';
+      runDistroQuiz();
+    }
+
+    /* --------------------------------------------------------------------------
+       4. PAGE 02: BASIC COMMANDS DATA, COPY BUTTON & SANDBOX TERMINAL
+       -------------------------------------------------------------------------- */
+    const COMMANDS_DATA = [
+      {
+        cat: 'nav',
+        cmd: 'pwd',
+        title: 'Print Working Directory',
+        flags: [],
+        desc: 'Displays the full absolute path of the folder you are currently inside (starting from the root directory `/`).',
+        output: '/home/guest/workspace'
+      },
+      {
+        cat: 'nav',
+        cmd: 'ls -la',
+        title: 'List Directory Contents (Long + Hidden)',
+        flags: ['-l (long permissions/size)', '-a (show hidden .dotfiles)'],
+        desc: 'Lists all files and folders in the current directory. On Linux, any file or folder starting with a dot (like `.bashrc` or `.config`) is hidden unless `-a` is passed.',
+        output: 'drwxr-xr-x 4 guest guest 4096 Nov 08 14:10 .\n-rw-r--r-- 1 guest guest  842 Nov 08 12:00 .bashrc\n-rwxr-xr-x 1 guest guest 1024 Nov 08 14:09 deploy.sh'
+      },
+      {
+        cat: 'nav',
+        cmd: 'cd ~/Projects && cd -',
+        title: 'Change Directory & Toggle Previous Folder',
+        flags: ['~ (home dir)', '.. (parent dir)', '- (previous dir)'],
+        desc: 'Moves you between folders. Pro-tip: running `cd -` immediately teleports you back to whichever directory you were in previously!',
+        output: '/home/guest'
+      },
+      {
+        cat: 'files',
+        cmd: 'mkdir -p ~/code/linux-app/src',
+        title: 'Make Nested Directories',
+        flags: ['-p (create parent directories as needed)'],
+        desc: 'Creates a new folder. Passing the `-p` flag tells `mkdir` to automatically create any missing parent directories along the path without throwing an error.',
+        output: '[Created directory tree ~/code/linux-app/src]'
+      },
+      {
+        cat: 'files',
+        cmd: 'cp -r configs/ configs_backup/',
+        title: 'Copy Files or Directories Recursively',
+        flags: ['-r (recursive for folders)', '-i (interactive overwrite prompt)'],
+        desc: 'Copies files or directories. To copy an entire directory and everything inside it, you must pass `-r` (recursive).',
+        output: "'configs/' -> 'configs_backup/'"
+      },
+      {
+        cat: 'files',
+        cmd: 'mv old_name.txt ~/Documents/new_name.txt',
+        title: 'Move or Rename Files',
+        flags: ['-i (prompt before overwriting)'],
+        desc: 'In Linux, moving a file and renaming a file are the exact same operation (`mv`). If the destination is in the same folder, it renames the file in place.',
+        output: '[Moved and renamed to ~/Documents/new_name.txt]'
+      },
+      {
+        cat: 'files',
+        cmd: 'rm -ri build_cache/',
+        title: 'Remove Files or Directories Safely',
+        flags: ['-r (recursive)', '-i (ask confirmation)', '-f (force without asking)'],
+        desc: 'Permanently unlinks files. Using `-ri` asks for confirmation before deleting items, protecting you from accidental data loss.',
+        output: "rm: descend into directory 'build_cache/'? y"
+      },
+      {
+        cat: 'search',
+        cmd: 'cat /etc/os-release',
+        title: 'Concatenate & Print File Contents',
+        flags: ['-n (number output lines)'],
+        desc: 'Prints the entire contents of a short text file directly to your terminal screen. (`/etc/os-release` identifies any Linux distribution).',
+        output: 'NAME="Linux Mint"\nVERSION="22.1 (Xia)"\nID=linuxmint\nID_LIKE="ubuntu debian"'
+      },
+      {
+        cat: 'search',
+        cmd: 'less /var/log/syslog',
+        title: 'Scrollable Page Viewer for Long Files',
+        flags: ['/pattern (search forward)', 'q (quit viewer)'],
+        desc: 'Opens large log files or manuals in a scrollable view without dumping 50,000 lines onto your screen. Press `q` at any time to exit.',
+        output: '[Viewing /var/log/syslog — Press / to search, q to quit]'
+      },
+      {
+        cat: 'search',
+        cmd: 'grep -rn "ERROR" ./logs/',
+        title: 'Search Inside Files for Matching Text',
+        flags: ['-r (recursive)', '-n (line numbers)', '-i (case-insensitive)'],
+        desc: 'Searches through files for lines matching a pattern or regular expression and prints the exact filename and line number.',
+        output: './logs/auth.log:142:ERROR: Failed SSH key authentication'
+      },
+      {
+        cat: 'perms',
+        cmd: 'chmod +x install.sh',
+        title: 'Change File Mode / Permissions',
+        flags: ['+x (make executable)', '755 (rwxr-xr-x)', '644 (rw-r--r--)'],
+        desc: 'Downloaded scripts on Linux cannot be executed until you grant them the execute (`+x`) permission bit.',
+        output: '-rwxr-xr-x 1 guest guest 2048 Nov 08 14:20 install.sh'
+      },
+      {
+        cat: 'perms',
+        cmd: 'sudo apt update',
+        title: 'Execute Command as Superuser (Root)',
+        flags: ['-i (open root shell)', '!! (re-run last cmd with sudo)'],
+        desc: 'Temporarily elevates privileges to `root` to modify system files or install packages. Prompts for your user password (characters are hidden for security as you type).',
+        output: '[sudo] password for guest: \nHit:1 http://archive.ubuntu.com/ubuntu noble InRelease'
+      },
+      {
+        cat: 'sys',
+        cmd: 'df -h',
+        title: 'Disk Free Space (Human-Readable)',
+        flags: ['-h (human-readable GiB/MiB)', '-T (show filesystem type ext4/btrfs)'],
+        desc: 'Shows mounted partitions, total capacity, used space, and remaining disk space in easy-to-read gigabytes (`-h`).',
+        output: 'Filesystem      Size  Used Avail Use% Mounted on\n/dev/nvme0n1p2  468G   84G  361G  19% /'
+      },
+      {
+        cat: 'sys',
+        cmd: 'free -h && btop',
+        title: 'Memory Usage & Interactive Process Monitor',
+        flags: ['-h (human-readable)', 'htop / btop (interactive TUI)'],
+        desc: 'Shows RAM and Swap usage. Note: Linux uses spare RAM for disk caching ("buff/cache"); look at the `available` column to see true free memory!',
+        output: '               total        used        free      shared  buff/cache   available\nMem:           15Gi       3.2Gi       6.1Gi       412Mi       6.4Gi        12Gi'
+      },
+      {
+        cat: 'sys',
+        cmd: 'ip -br a',
+        title: 'Show Network Interfaces & IP Addresses',
+        flags: ['-br (brief tabular output)', 'a (addresses)'],
+        desc: 'Modern replacement from `iproute2` for the deprecated `ifconfig` command. Displays your Ethernet (`enp...`) and Wi-Fi (`wlan0`) IP addresses.',
+        output: 'lo               UNKNOWN        127.0.0.1/8\nwlan0            UP             192.168.1.42/24'
+      }
+    ];
+
+    function renderCommandsGrid(filterCat = 'all') {
+      const grid = document.getElementById('commands-grid');
+      const filtered = filterCat === 'all' ? COMMANDS_DATA : COMMANDS_DATA.filter(c => c.cat === filterCat);
+
+      grid.innerHTML = filtered.map((item, idx) => `
+        <div class="term-card rounded-lg p-4 sm:p-5 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between gap-2 mb-2">
+              <span class="font-mono-code text-xs text-term-blue font-semibold">${item.title}</span>
+              <button onclick="copyCommandText(this, '${item.cmd.replace(/'/g, "\\'")}')" class="font-mono-code text-xs bg-term-elevated hover:bg-term-mantle text-term-sub hover:text-term-green px-2.5 py-1 rounded border border-[var(--border-bright)] transition">
+                [Copy]
+              </button>
+            </div>
+
+            <div class="bg-term-mantle border border-[var(--border-dim)] rounded px-3 py-2 font-mono-code text-xs sm:text-sm text-term-green font-bold overflow-x-auto">
+              $ ${item.cmd}
+            </div>
+
+            ${item.flags.length ? `
+              <div class="flex flex-wrap gap-1.5 mt-2.5">
+                ${item.flags.map(f => `<span class="flag-pill">${f}</span>`).join('')}
+              </div>
+            ` : ''}
+
+            <p class="text-xs sm:text-sm text-term-sub mt-2.5">${item.desc}</p>
+          </div>
+
+          <pre class="mt-3 bg-term-mantle/80 border-t border-[var(--border-dim)] p-2.5 rounded text-[11px] font-mono-code text-term-muted overflow-x-auto">${item.output}</pre>
+        </div>
+      `).join('');
+    }
+
+    function filterCommands(cat) {
+      document.querySelectorAll('.cmd-filter-btn').forEach(btn => {
+        btn.className = 'cmd-filter-btn px-3 py-1.5 rounded bg-term-surface text-term-sub border border-[var(--border-dim)]';
+      });
+      const activeBtn = document.getElementById('cmd-filter-' + cat);
+      if (activeBtn) {
+        activeBtn.className = 'cmd-filter-btn px-3 py-1.5 rounded bg-term-elevated text-term-green border border-[var(--accent-green)]';
+      }
+      renderCommandsGrid(cat);
+    }
+
+    function copyCommandText(btnEl, text) {
+      const tempInput = document.createElement('textarea');
+      tempInput.value = text;
+      document.body.appendChild(tempInput);
+      tempInput.select();
+      document.execCommand('copy');
+      document.body.removeChild(tempInput);
+
+      const original = btnEl.textContent;
+      btnEl.textContent = '[Copied! ✓]';
+      btnEl.classList.add('text-term-green');
+      setTimeout(() => {
+        btnEl.textContent = original;
+      }, 1500);
+    }
+
+    /* Interactive chmod Calculator */
+    function updateChmodCalc() {
+      const calcTriad = (p) => {
+        const r = document.getElementById(`chmod-${p}r`).checked ? 4 : 0;
+        const w = document.getElementById(`chmod-${p}w`).checked ? 2 : 0;
+        const x = document.getElementById(`chmod-${p}x`).checked ? 1 : 0;
+        const sym = (r ? 'r' : '-') + (w ? 'w' : '-') + (x ? 'x' : '-');
+        return { num: r + w + x, sym };
+      };
+      const u = calcTriad('u');
+      const g = calcTriad('g');
+      const o = calcTriad('o');
+      document.getElementById('chmod-cmd-out').textContent = `chmod ${u.num}${g.num}${o.num} script.sh`;
+      document.getElementById('chmod-sym-out').textContent = `-${u.sym}${g.sym}${o.sym}`;
+    }
+
+    function setChmodPreset(octal) {
+      const digits = String(octal).padStart(3, '0').split('').map(Number);
+      const prefixes = ['u', 'g', 'o'];
+      prefixes.forEach((p, idx) => {
+        const val = digits[idx];
+        document.getElementById(`chmod-${p}r`).checked = Boolean(val & 4);
+        document.getElementById(`chmod-${p}w`).checked = Boolean(val & 2);
+        document.getElementById(`chmod-${p}x`).checked = Boolean(val & 1);
+      });
+      updateChmodCalc();
+    }
+
+    /* Interactive Sandbox Terminal */
+    let sandboxDir = '/home/guest/workspace';
+    let deployPerms = '-rw-r--r--';
+
+    function runSandboxCmd(rawCmd) {
+      const input = document.getElementById('sandbox-input');
+      input.value = rawCmd;
+      executeSandboxCommand(rawCmd);
+      input.value = '';
+    }
+
+    function handleSandboxSubmit(e) {
+      e.preventDefault();
+      const input = document.getElementById('sandbox-input');
+      const cmd = input.value.trim();
+      if (!cmd) return;
+      executeSandboxCommand(cmd);
+      input.value = '';
+    }
+
+    function clearSandbox() {
+      document.getElementById('sandbox-output').innerHTML = '<div class="text-term-muted"># Terminal cleared. Type `help` or `ls -la`.</div>';
+    }
+
+    function executeSandboxCommand(cmd) {
+      const outLog = document.getElementById('sandbox-output');
+      const shortCwd = sandboxDir.replace('/home/guest', '~');
+      let response = '';
+
+      const clean = cmd.trim();
+      if (clean === 'clear') {
+        clearSandbox();
+        return;
+      } else if (clean === 'help') {
+        response = 'Available sandbox commands: ls, ls -la, pwd, cd projects, cd .., cat welcome.txt, cat notes.md, whoami, df -h, free -h, ip a, grep -rn TODO, chmod 755 deploy.sh, uname -a, clear';
+      } else if (clean === 'pwd') {
+        response = sandboxDir;
+      } else if (clean === 'whoami') {
+        response = 'guest';
+      } else if (clean === 'uname -a') {
+        response = 'Linux thinkpad-t14 6.12.9-lts #1 SMP PREEMPT_DYNAMIC x86_64 GNU/Linux';
+      } else if (clean === 'ls') {
+        response = sandboxDir.endsWith('projects')
+          ? 'distro_notes.txt  kernel_config.bak'
+          : 'deploy.sh  notes.md  <span class="text-term-blue font-bold">projects/</span>  welcome.txt';
+      } else if (clean === 'ls -la' || clean === 'ls -al' || clean === 'ls -l') {
+        response = sandboxDir.endsWith('projects')
+          ? 'drwxr-xr-x 2 guest guest 4096 Nov 08 14:00 .\n-rw-r--r-- 1 guest guest  512 Nov 08 13:45 distro_notes.txt'
+          : `drwxr-xr-x 3 guest guest 4096 Nov 08 14:22 .\n-rw------- 1 guest guest  310 Nov 08 10:15 .bash_history\n${deployPerms} 1 guest guest 1024 Nov 08 14:10 deploy.sh\n-rw-r--r-- 1 guest guest  420 Nov 08 13:00 notes.md\ndrwxr-xr-x 2 guest guest 4096 Nov 08 14:00 <span class="text-term-blue font-bold">projects/</span>\n-rw-r--r-- 1 guest guest  290 Nov 08 12:30 welcome.txt`;
+      } else if (clean === 'cd projects' || clean === 'cd projects/') {
+        sandboxDir = '/home/guest/workspace/projects';
+        response = '[Changed directory to ~/workspace/projects]';
+      } else if (clean === 'cd ..' || clean === 'cd ~' || clean === 'cd -' || clean === 'cd') {
+        sandboxDir = '/home/guest/workspace';
+        response = '[Changed directory to ~/workspace]';
+      } else if (clean === 'cat welcome.txt') {
+        response = 'Welcome to Linux! Everything on a UNIX-like system is either a file or a process.\nTip: Try running `chmod 755 deploy.sh` and then `ls -la` to watch the permission bits update!';
+      } else if (clean === 'cat notes.md') {
+        response = '# Linux Study Notes\n- TODO: Test Fedora KDE and Linux Mint inside QEMU/KVM\n- Remember that `free -h` available column includes reclaimable disk cache.';
+      } else if (clean.startsWith('chmod')) {
+        deployPerms = '-rwxr-xr-x';
+        response = 'Updated permissions on deploy.sh -> -rwxr-xr-x (0755)';
+      } else if (clean === 'df -h') {
+        response = 'Filesystem      Size  Used Avail Use% Mounted on\n/dev/nvme0n1p2  512G   64G  448G  13% /\ntmpfs           7.8G   12M  7.8G   1% /run';
+      } else if (clean === 'free -h') {
+        response = '               total        used        free      shared  buff/cache   available\nMem:            15Gi       2.4Gi       8.9Gi       210Mi       4.1Gi        12Gi\nSwap:          8.0Gi          0B       8.0Gi';
+      } else if (clean === 'ip a' || clean === 'ip -br a') {
+        response = '1: lo: <LOOPBACK,UP> 127.0.0.1/8\n2: wlan0: <BROADCAST,MULTICAST,UP> inet 192.168.1.108/24';
+      } else if (clean.startsWith('grep')) {
+        response = './notes.md:2:- TODO: Test Fedora KDE and Linux Mint inside QEMU/KVM';
+      } else {
+        response = `bash: ${clean.split(' ')[0]}: command not found in sandbox (try: ls -la, pwd, cat welcome.txt, df -h, free -h, ip a, help)`;
+      }
+
+      const newShortCwd = sandboxDir.replace('/home/guest', '~');
+      document.getElementById('sandbox-prompt').textContent = `guest@sandbox:${newShortCwd}$`;
+
+      const entry = document.createElement('div');
+      entry.innerHTML = `
+        <div><span class="text-term-green">guest@sandbox:${shortCwd}$</span> ${clean.replace(/</g, '&lt;')}</div>
+        <pre class="text-term-main whitespace-pre-wrap mt-0.5">${response}</pre>
+      `;
+      outLog.appendChild(entry);
+      outLog.scrollTop = outLog.scrollHeight;
+    }
+
+    /* --------------------------------------------------------------------------
+       5. PAGE 06: INTERACTIVE GENTOO USE FLAG SIMULATOR
+       -------------------------------------------------------------------------- */
+    const useFlagsState = {
+      wayland: true,
+      pipewire: true,
+      vulkan: true,
+      X: false,
+      bluetooth: false,
+      samba: false
+    };
+
+    function toggleUseFlag(flag) {
+      useFlagsState[flag] = !useFlagsState[flag];
+      updateUseSimulator();
+    }
+
+    function updateUseSimulator() {
+      let enabledCount = 0;
+      const makeConfTokens = [];
+      const emergeTokens = [];
+
+      Object.keys(useFlagsState).forEach(flag => {
+        const isOn = useFlagsState[flag];
+        const btn = document.getElementById('use-btn-' + flag);
+        if (isOn) {
+          enabledCount++;
+          makeConfTokens.push(flag);
+          emergeTokens.push(`<span class="text-term-red font-semibold">${flag}</span>`);
+          if (btn) {
+            btn.className = 'p-2 rounded border border-[var(--accent-green)] bg-term-mantle text-term-green text-left';
+            btn.textContent = '+' + flag;
+          }
+        } else {
+          makeConfTokens.push('-' + flag);
+          emergeTokens.push(`<span class="text-term-blue">-${flag}</span>`);
+          if (btn) {
+            btn.className = 'p-2 rounded border border-[var(--border-dim)] bg-term-mantle text-term-red text-left';
+            btn.textContent = '-' + flag;
+          }
+        }
+      });
+
+      document.getElementById('make-conf-use-line').textContent = `USE="${makeConfTokens.join(' ')}"`;
+      document.getElementById('emerge-output-line').innerHTML = `[ebuild   R    ] <span class="text-term-blue font-bold">media-video/mpv-0.39.0</span>::gentoo  USE="${emergeTokens.join(' ')}"`;
+
+      const deps = 9 + enabledCount * 4;
+      const size = (8.4 + enabledCount * 2.3).toFixed(1);
+      const totalSeconds = 55 + enabledCount * 24;
+      const mins = Math.floor(totalSeconds / 60);
+      const secs = totalSeconds % 60;
+
+      document.getElementById('emerge-deps').textContent = `${deps} pkgs`;
+      document.getElementById('emerge-size').textContent = `${size} MiB`;
+      document.getElementById('emerge-time').textContent = `~${mins}m ${secs}s`;
+    }
+
+    /* --------------------------------------------------------------------------
+       6. BOTTOM TMUX COMMAND BAR HANDLER
+       -------------------------------------------------------------------------- */
+    function handleTmuxCommand(e) {
+      e.preventDefault();
+      const input = document.getElementById('tmux-cmd-input');
+      const raw = input.value.trim().toLowerCase();
+      if (!raw) return;
+      input.value = '';
+
+      const showToast = (msg) => {
+        const toast = document.getElementById('tmux-cmd-toast');
+        document.getElementById('tmux-cmd-toast-text').textContent = msg;
+        toast.classList.remove('hidden');
+      };
+
+      if (raw === 'help' || raw === ':help') {
+        showToast('Commands: goto 0..6 | ls | neofetch | uname -a | theme catppuccin/gruvbox/amber | crt');
+      } else if (raw === 'ls') {
+        showToast('00_welcome.sh  01_distro_choice.sh  02_basic_commands.sh  03_desktop_envs.sh  04_wayland_vs_xorg.sh  05_debian_fedora_arch.sh  06_gentoo_and_void.sh');
+      } else if (raw === 'uname -a' || raw === 'uname') {
+        showToast('Linux linux-guide-tty 6.12.9-lts #1 SMP PREEMPT_DYNAMIC x86_64 GNU/Linux');
+      } else if (raw === 'neofetch' || raw === 'fastfetch' || raw === 'goto 0' || raw === '0') {
+        navigateTo('welcome');
+      } else if (raw === 'goto 1' || raw === '1' || raw.includes('distro')) {
+        navigateTo('distro');
+      } else if (raw === 'goto 2' || raw === '2' || raw.includes('command')) {
+        navigateTo('commands');
+      } else if (raw === 'goto 3' || raw === '3' || raw.includes('de') || raw.includes('desktop')) {
+        navigateTo('de');
+      } else if (raw === 'goto 4' || raw === '4' || raw.includes('wayland') || raw.includes('xorg')) {
+        navigateTo('display');
+      } else if (raw === 'goto 5' || raw === '5' || raw.includes('debian') || raw.includes('arch') || raw.includes('fedora')) {
+        navigateTo('bigthree');
+      } else if (raw === 'goto 6' || raw === '6' || raw.includes('gentoo') || raw.includes('void')) {
+        navigateTo('advanced');
+      } else if (raw.startsWith('theme ')) {
+        const t = raw.replace('theme ', '').trim();
+        if (['catppuccin', 'gruvbox', 'amber'].includes(t)) {
+          setTheme(t);
+          showToast(`Switched terminal palette to ${t}`);
+        }
+      } else if (raw === 'crt') {
+        toggleCRT();
+      } else {
+        showToast(`Unknown command "${raw}". Try: goto 1..6, ls, help, uname -a, theme gruvbox`);
+      }
+    }
+
+    /* Initialize interactive components on load */
+    window.addEventListener('DOMContentLoaded', () => {
+      runDistroQuiz();
+      renderCommandsGrid('all');
+      updateChmodCalc();
+      updateUseSimulator();
+    });
+  </script>
+</body>
+</html>
